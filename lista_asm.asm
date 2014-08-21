@@ -63,12 +63,13 @@ section .rodata
 section .data
 
 
+
 section .text
 
 ; FUNCIONES OBLIGATORIAS. PUEDEN CREAR LAS FUNCIONES AUXILIARES QUE CREAN CONVENIENTES
 
 ;nodo *nodo_crear (void *datos);
- stdlib
+; stdlib
 nodo_crear:
 	push rbp
 	mov rbp, rsp
@@ -78,9 +79,9 @@ nodo_crear:
 	mov rdi, NODO_SIZE
 	call malloc
 	add rsp, 8
-	push [rax + OFFSET_DATOS]
-	mov  [rax + OFFSET_SIG], NULL
-	mov  [rax + OFFSET_ANT], NULL
+	push qword[rax + OFFSET_DATOS]
+	mov qword [rax + OFFSET_SIG], NULL
+	mov qword [rax + OFFSET_ANT], NULL
 	pop rbp
 	ret
 
@@ -91,37 +92,47 @@ lista_crear:
 	
 	mov rdi, LISTA_SIZE
 	call malloc
-	mov [rax + OFFSET_PRIMERO], NULL
-	mov [rax + OFFSET_PRIMERO], NULL
+	mov qword [rax + OFFSET_PRIMERO], NULL
+	mov qword[rax + OFFSET_PRIMERO], NULL
 	
 	pop rbp
 	ret
 
+;nodo nodo_borrar(nodo *n, tipo_funcion_borrar f)
+nodo_borrar:
+    push rbp
+    mov rbp, rsp
+    push qword [rdi + OFFSET_SIG]
+    push rdi
+    ;elimino el elemento
+    mov rdi, rdi + OFFSET_DATOS 
+    call rsi
+    ;elimino el nodo
+    pop rdi
+    call free
+    ;pongo el nodo siguiente en rax para devolverlo
+    pop rax
+    pop rbp
+    ret
 	
 ;void lista_borrar (lista *l, tipo_funcion_borrar f);
-nodo_en_el_que_estoy_parado equ rbp + 8
-nodo_siguiente equ rbp + 16
-
 lista_borrar:
 	push rbp
 	mov rbp, rsp
 
-	push [rdi]; primer nodo
-	push [[rdi + OFFSET_SIG]]; siguiente elemento al primer nodo
+	push rdi
+	sub rsp, 8
+	mov rdi, [rdi]
 	
-LOOP_N: sub nodo_en_el_que_estoy_parado, NULL
+LOOP_N:	cmp qword [rdi], NULL
 	JZ FIN
-	mov rdi, nodo_en_el_que_estoy_parado
-	call free
-	sub nodo_siguiente, NULL
-	JZ FIN
-	mov nodo_en_el_que_estoy_parado, nodo_siguiente
-	mov nodo_siguiente, [nodo_en_el_que_estoy_parado + OFFSET_SIG] 
+	call nodo_borrar
+	mov rdi, rax
 	JMP LOOP_N
 FIN:	
+	add rsp, 8
+	pop rdi
 	call free; libero la lista
-	pop
-	pop
 	
 	pop rbp
 	ret

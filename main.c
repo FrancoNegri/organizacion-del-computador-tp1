@@ -1,6 +1,8 @@
 #include "lista.h"
 #include <stdio.h>
 
+int testSizes();
+
 int main(void) {
     testSizes();
     return 0;
@@ -16,7 +18,7 @@ int testSizes()
     printf("Entero: %d \n",sizeof(entero));
     printf("Puntero: %d \n",sizeof(puntero));
     printf("Caracter: %d \n",sizeof(caracter));
-    printf("Doble: %d \n",doble);
+    printf("Doble: %d \n",sizeof(doble));
     return 0;
   
 }
