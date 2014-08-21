@@ -11,10 +11,12 @@ int testSizes()
     int * puntero;
     int entero;
     char caracter;
+    double doble;
     printf("Test de tamaños para gcc \n");
     printf("Entero: %d \n",sizeof(entero));
     printf("Puntero: %d \n",sizeof(puntero));
     printf("Caracter: %d \n",sizeof(caracter));
+    printf("Doble: %d \n",doble);
     return 0;
   
 }

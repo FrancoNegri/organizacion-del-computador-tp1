@@ -1,3 +1,6 @@
+extern malloc, free
+
+
 global nodo_crear
 global lista_crear
 global lista_borrar
@@ -27,26 +30,31 @@ extern insertar_ultimo
 %define TRUE 1
 %define FALSE 0
 
+;size(puntero) = 
+;size(char) = 
+;size(double) = 
+;size(entero) =
+
 %define NODO_SIZE      24; 3 punteros 
 %define LISTA_SIZE     16; 2 punteros
-%define JUGADOR_SIZE   0 ; 2 punteros (16) + char(1) + entero(4)
-%define SELECCION_SIZE 0 
+%define JUGADOR_SIZE   0 ; 2 punteros + char + entero
+%define SELECCION_SIZE 0 ; 2 punteros + double
 
-%define OFFSET_DATOS 0
-%define OFFSET_SIG   0 
-%define OFFSET_ANT   0 
+%define OFFSET_DATOS 0 ; primer elemento, offset 0
+%define OFFSET_SIG   0 ; segundo elemento, offset 0 + puntero
+%define OFFSET_ANT   0 ; tercer elemento, offset 0 + puntero + puntero
 
-%define OFFSET_PRIMERO 0
-%define OFFSET_ULTIMO  0 
+%define OFFSET_PRIMERO 0 ; offset 0
+%define OFFSET_ULTIMO  0 ; offset 0 + puntero
 
-%define OFFSET_NOMBRE_J 0
-%define OFFSET_PAIS_J   0 
-%define OFFSET_NUMERO_J 0 
-%define OFFSET_ALTURA_J 0 
+%define OFFSET_NOMBRE_J 0 ; 0
+%define OFFSET_PAIS_J   0 ; 0 + puntero
+%define OFFSET_NUMERO_J 0 ; 0 + puntero + puntero
+%define OFFSET_ALTURA_J 0 ; 0 + puntero + puntero + char
 
-%define OFFSET_PAIS_S      0
-%define OFFSET_ALTURA_S    0 
-%define OFFSET_JUGADORES_S 0 
+%define OFFSET_PAIS_S      0 ; 0
+%define OFFSET_ALTURA_S    0 ; 0 + puntero
+%define OFFSET_JUGADORES_S 0 ; 0 + puntero + double
 
 
 section .rodata
@@ -59,15 +67,66 @@ section .text
 
 ; FUNCIONES OBLIGATORIAS. PUEDEN CREAR LAS FUNCIONES AUXILIARES QUE CREAN CONVENIENTES
 
+;nodo *nodo_crear (void *datos);
+ stdlib
 nodo_crear:
-	; COMPLETAR AQUI EL CODIGO
+	push rbp
+	mov rbp, rsp
+	push rdi; PILA DESALINEADA, OMFWTF
+	;... OK... no entres en panico... que haría superman?
+	sub rsp, 8
+	mov rdi, NODO_SIZE
+	call malloc
+	add rsp, 8
+	push [rax + OFFSET_DATOS]
+	mov  [rax + OFFSET_SIG], NULL
+	mov  [rax + OFFSET_ANT], NULL
+	pop rbp
+	ret
 
+;lista *lista_crear (void);
 lista_crear:
-	; COMPLETAR AQUI EL CODIGO
+	push rbp
+	mov rbp, rsp
+	
+	mov rdi, LISTA_SIZE
+	call malloc
+	mov [rax + OFFSET_PRIMERO], NULL
+	mov [rax + OFFSET_PRIMERO], NULL
+	
+	pop rbp
+	ret
+
+	
+;void lista_borrar (lista *l, tipo_funcion_borrar f);
+nodo_en_el_que_estoy_parado equ rbp + 8
+nodo_siguiente equ rbp + 16
 
 lista_borrar:
-	; COMPLETAR AQUI EL CODIGO
+	push rbp
+	mov rbp, rsp
 
+	push [rdi]; primer nodo
+	push [[rdi + OFFSET_SIG]]; siguiente elemento al primer nodo
+	
+LOOP_N: sub nodo_en_el_que_estoy_parado, NULL
+	JZ FIN
+	mov rdi, nodo_en_el_que_estoy_parado
+	call free
+	sub nodo_siguiente, NULL
+	JZ FIN
+	mov nodo_en_el_que_estoy_parado, nodo_siguiente
+	mov nodo_siguiente, [nodo_en_el_que_estoy_parado + OFFSET_SIG] 
+	JMP LOOP_N
+FIN:	
+	call free; libero la lista
+	pop
+	pop
+	
+	pop rbp
+	ret
+
+	
 lista_imprimir:
 	; COMPLETAR AQUI EL CODIGO
 
