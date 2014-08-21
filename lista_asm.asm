@@ -24,12 +24,12 @@ extern insertar_ultimo
 
 ; SE RECOMIENDA COMPLETAR LOS DEFINES CON LOS VALORES CORRECTOS
 %define NULL 0
-%define TRUE 0
+%define TRUE 1
 %define FALSE 0
 
-%define NODO_SIZE      0 
-%define LISTA_SIZE     0 
-%define JUGADOR_SIZE   0 
+%define NODO_SIZE      24; 3 punteros 
+%define LISTA_SIZE     16; 2 punteros
+%define JUGADOR_SIZE   0 ; 2 punteros (16) + char(1) + entero(4)
 %define SELECCION_SIZE 0 
 
 %define OFFSET_DATOS 0
