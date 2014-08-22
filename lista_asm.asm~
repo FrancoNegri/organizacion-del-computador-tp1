@@ -35,10 +35,6 @@ extern insertar_ultimo
 ;Caracter: 1 
 ;Doble: 8 
 
-;dword = 4
-;word = 2
-;qword = 8
-
 
 %define NODO_SIZE      24; 3 punteros (8*3)
 %define LISTA_SIZE     16; 2 punteros (8*2)
@@ -144,25 +140,13 @@ FIN:
 
 	
 lista_imprimir:
-	
+	; COMPLETAR AQUI EL CODIGO
 
 lista_imprimir_f:
 	; COMPLETAR AQUI EL CODIGO
 
-;jugador *crear_jugador (char *nombre, char *pais, char numero, unsigned int altura)
 crear_jugador:
-	push rbp
-	mov rbp, rsp
-	
-	mov rdi, JUGADOR_SIZE
-	call malloc
-	mov [rax + OFFSET_NOMBRE_J], RDI 
-	mov [rax + OFFSET_PAIS_J], RSI
-	mov byte [RAX + OFFSET_NUMERO_J], CL
-	mov word [RAX + OFFSET_ALTURA_J], DX; ver cuanto mide una int!!!!
-	
-	pop rbp
-	ret
+	; COMPLETAR AQUI EL CODIGO
 
 menor_jugador:
 	; COMPLETAR AQUI EL CODIGO
@@ -173,64 +157,14 @@ normalizar_jugador:
 pais_jugador:
 	; COMPLETAR AQUI EL CODIGO
 
-;void borrar_jugador(jugador *j)
 borrar_jugador:
-	
-	push rbp
-	mov rbp, rsp
-	
-	push rdi ;DESALINEADA
-	sub rsp, 8;Alineada
-	mov rdi,[rdi + OFFSET_NOMBRE_J]
-	call free
-	add rsp, 8;DESALINEADA
-	
-	pop rdi;ALINEADA
-	push rdi;DESALINEADA
-	sub rsp, 8;ALINEADA
-	mov rdi,[rdi + OFFSET_PAIS_J]
-	call free
-	
-	add rsp, 8;DESALINEADA
-	pop rdi;ALINEADA
-	call free
-	
-	pop rbp
-	ret
+	; COMPLETAR AQUI EL CODIGO
 
 imprimir_jugador:
 	; COMPLETAR AQUI EL CODIGO
 
-	
-;void copiar_cadena(char* cadenaOriginal, char* cadenaCopiada)
-copiar_cadena:
-	
-	
-	
-;seleccion *crear_seleccion(char *pais, double alturaPromedio, lista *jugadores)
 crear_seleccion:
-	push rbp
-	mov rbp, rsp
-	
-	push RDI;D
-	push rsi;D
-	push rdx;A
-	
-	sub rsp,8;A
-	
-	mov rdi, SELECCION_SIZE
-	call malloc
-	
-	add rsp, 8
-	pop qword [rax + OFFSET_JUGADORES_S] 
-	pop [rax + OFFSET_ALTURA_S]; ver cuanto mide un double
-	
-	pop rdi
-	mov rsi, rax
-	call copiar_cadena
-	
-	pop rbp
-	ret
+	; COMPLETAR AQUI EL CODIGO
 
 menor_seleccion:
 	; COMPLETAR AQUI EL CODIGO
@@ -238,24 +172,8 @@ menor_seleccion:
 primer_jugador:
 	; COMPLETAR AQUI EL CODIGO
 
-;void borrar_seleccion(seleccion *s)
 borrar_seleccion:
-	push rbp
-	mov rbp, rsp
-	
-	push rdi;D
-	sub rsp,8;A
-	
-	mov rdi, [rdi + OFFSET_PAIS_S]
-	call free
-	
-	add rsp,8;D
-	pop rdi;A
-	call free
-	
-	pop rbp
-	ret
-
+	; COMPLETAR AQUI EL CODIGO
 
 imprimir_seleccion:
 	; COMPLETAR AQUI EL CODIGO

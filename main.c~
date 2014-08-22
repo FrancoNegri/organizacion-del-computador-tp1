@@ -15,7 +15,7 @@ int main(void) {
 
 int testNodo()
 {
-	int *hola = 1;
+	int hola = 1;
 	nodo *miNodo = nodo_crear(hola);
 	printf("Dato: %d \n",(int) miNodo->datos);
 	return 0;
