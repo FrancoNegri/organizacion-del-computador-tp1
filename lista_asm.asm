@@ -139,13 +139,25 @@ FIN:
 
 	
 lista_imprimir:
-	; COMPLETAR AQUI EL CODIGO
+	
 
 lista_imprimir_f:
 	; COMPLETAR AQUI EL CODIGO
 
+;jugador *crear_jugador (char *nombre, char *pais, char numero, unsigned int altura)
 crear_jugador:
-	; COMPLETAR AQUI EL CODIGO
+	push rbp
+	mov rbp, rsp
+	
+	mov rdi, JUGADOR_SIZE
+	call malloc
+	mov [rax + OFFSET_NOMBRE_J], RDI 
+	mov [rax + OFFSET_PAIS_J], RSI
+	mov byte [RAX + OFFSET_NUMERO_J], CL
+	mov word [RAX + OFFSET_ALTURA_J], DX; ver cuanto mide una int!!!!
+	
+	pop rbp
+	ret
 
 menor_jugador:
 	; COMPLETAR AQUI EL CODIGO
@@ -156,14 +168,64 @@ normalizar_jugador:
 pais_jugador:
 	; COMPLETAR AQUI EL CODIGO
 
+;void borrar_jugador(jugador *j)
 borrar_jugador:
-	; COMPLETAR AQUI EL CODIGO
+	
+	push rbp
+	mov rbp, rsp
+	
+	push rdi ;DESALINEADA
+	sub rsp, 8;Alineada
+	mov rdi,[rdi + OFFSET_NOMBRE_J]
+	call free
+	add rsp, 8;DESALINEADA
+	
+	pop rdi;ALINEADA
+	push rdi;DESALINEADA
+	sub rsp, 8;ALINEADA
+	mov rdi,[rdi + OFFSET_PAIS_J]
+	call free
+	
+	add rsp, 8;DESALINEADA
+	pop rdi;ALINEADA
+	call free
+	
+	pop rbp
+	ret
 
 imprimir_jugador:
 	; COMPLETAR AQUI EL CODIGO
 
+	
+;void copiar_cadena(char* cadenaOriginal, char* cadenaCopiada)
+copiar_cadena:
+	
+	
+	
+;seleccion *crear_seleccion(char *pais, double alturaPromedio, lista *jugadores)
 crear_seleccion:
-	; COMPLETAR AQUI EL CODIGO
+	push rbp
+	mov rbp, rsp
+	
+	push RDI;D
+	push rsi;D
+	push rdx;A
+	
+	sub rsp,8;A
+	
+	mov rdi, SELECCION_SIZE
+	call malloc
+	
+	add rsp, 8
+	pop qword [rax + OFFSET_JUGADORES_S] 
+	pop [rax + OFFSET_ALTURA_S]; ver cuanto mide un double
+	
+	pop rdi
+	mov rsi, rax
+	call copiar_cadena
+	
+	pop rbp
+	ret
 
 menor_seleccion:
 	; COMPLETAR AQUI EL CODIGO
@@ -171,8 +233,24 @@ menor_seleccion:
 primer_jugador:
 	; COMPLETAR AQUI EL CODIGO
 
+;void borrar_seleccion(seleccion *s)
 borrar_seleccion:
-	; COMPLETAR AQUI EL CODIGO
+	push rbp
+	mov rbp, rsp
+	
+	push rdi;D
+	sub rsp,8;A
+	
+	mov rdi, [rdi + OFFSET_PAIS_S]
+	call free
+	
+	add rsp,8;D
+	pop rdi;A
+	call free
+	
+	pop rbp
+	ret
+
 
 imprimir_seleccion:
 	; COMPLETAR AQUI EL CODIGO
