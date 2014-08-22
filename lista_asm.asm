@@ -35,6 +35,10 @@ extern insertar_ultimo
 ;Caracter: 1 
 ;Doble: 8 
 
+;dword = 4
+;word = 2
+;qword = 8
+
 
 %define NODO_SIZE      24; 3 punteros (8*3)
 %define LISTA_SIZE     16; 2 punteros (8*2)
