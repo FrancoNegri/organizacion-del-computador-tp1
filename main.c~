@@ -8,30 +8,32 @@ int main(void) {
 
     testSizes();
     testNodo();
-    //testJugador();
+    testJugador();
     
     return 0;
 }
 
 int testNodo()
 {
-	int hola = 1;
+	int *hola = 1;
+	printf("Creando Nodo...\n");
 	nodo *miNodo = nodo_crear(hola);
+	printf("Ok!\n");
 	printf("Dato: %d \n",(int) miNodo->datos);
 	return 0;
 }
 
 int testJugador()
 {
-    char *nombre = "pepe";
-    char *pais = "pepe";
+    char *nombre = "pepe \n \0";
+    char *pais = "pepe \n \0";
     printf("Creando jugador...\n");
     jugador *pepe = crear_jugador(nombre,pais,'4',30);
     printf("Ok!\n");
-    printf("Altura: %d \n",pepe->numero);
-    printf("Nombre: %s \n",pepe->nombre);
-    printf("Pais: %s \n",pepe->pais);
-    
+    //printf("Altura: %d \n",pepe->numero);
+    //printf("Nombre: %s \n",pepe->nombre);
+    //printf("Pais: %s \n",pepe->pais);
+    borrar_jugador(pepe)
     return 0;
 }
 

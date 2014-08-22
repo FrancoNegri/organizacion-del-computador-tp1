@@ -1,4 +1,4 @@
-extern malloc, free
+extern malloc, free, printf
 
 
 global nodo_crear
@@ -56,6 +56,7 @@ extern insertar_ultimo
 %define OFFSET_PAIS_J   8 ; 0 + puntero
 %define OFFSET_NUMERO_J 16 ; 0 + puntero + puntero
 %define OFFSET_ALTURA_J 17 ; 0 + puntero + puntero + char
+
 
 %define OFFSET_PAIS_S      0 ; 0
 %define OFFSET_ALTURA_S    8 ; 0 + puntero
@@ -149,17 +150,42 @@ lista_imprimir:
 lista_imprimir_f:
 	; COMPLETAR AQUI EL CODIGO
 
+;rdi rsi rdx rcx
 ;jugador *crear_jugador (char *nombre, char *pais, char numero, unsigned int altura)
+
+
+%define PUNTERO_A_JUGADOR R13
 crear_jugador:
 	push rbp
 	mov rbp, rsp
+	sub rsp, 46; para que quede alineada me pido un multiplo de 16 y fue
 	
+	mov qword [rbp+ 16 + OFFSET_NOMBRE_J], rdi
+	mov qword [rbp+ 16 + OFFSET_PAIS_J], rsi
+	mov byte [rbp+ 16 + OFFSET_NUMERO_J], dl
+	mov dword [rbp+ 16 + OFFSET_ALTURA_J], ecx
+
 	mov rdi, JUGADOR_SIZE
 	call malloc
-	mov [rax + OFFSET_NOMBRE_J], RDI 
-	mov [rax + OFFSET_PAIS_J], RSI
-	mov byte [RAX + OFFSET_NUMERO_J], CL
-	mov word [RAX + OFFSET_ALTURA_J], DX; ver cuanto mide una int!!!!
+	
+	mov PUNTERO_A_JUGADOR, rax
+	
+	mov rdi , [rbp + 16 + OFFSET_NOMBRE_J]
+	call copiar_cadena
+	mov [PUNTERO_A_JUGADOR + OFFSET_NOMBRE_J], rax
+	
+	
+	mov rdi, [rbp + 16 + OFFSET_PAIS_J]
+	call copiar_cadena
+	mov [PUNTERO_A_JUGADOR + OFFSET_PAIS_J], rax
+	
+	mov byte al, [rbp+ 16 + OFFSET_NUMERO_J]; byte
+	mov [PUNTERO_A_JUGADOR + OFFSET_NUMERO_J], al
+	
+	mov dword eax, [rbp+ 16 + OFFSET_ALTURA_J];dword
+	mov [PUNTERO_A_JUGADOR + OFFSET_ALTURA_J], eax	
+	
+	add rsp,46
 	
 	pop rbp
 	ret
@@ -201,11 +227,37 @@ borrar_jugador:
 imprimir_jugador:
 	; COMPLETAR AQUI EL CODIGO
 
-	
-;void copiar_cadena(char* cadenaOriginal, char* cadenaCopiada)
+%define CONTADOR R15
+
+;copiar cadena toma registro rdi, y genera una copia que devuelve por rax, no modifica R13, convencion FN
 copiar_cadena:
+	push rbp
+	mov rbp, rsp
+	mov qword R14, rdi
 	
+	mov qword CONTADOR, 0
+loop:	cmp byte [rdi + CONTADOR],0
+	jz fin_cadena
+	add qword CONTADOR,1
+	jmp loop
+fin_cadena:	
+	add CONTADOR, 5 ; ver si lo puedo sacar
+	mov qword rdi, CONTADOR
+	call malloc
+	sub CONTADOR, 4
+copiando:
+	mov dl ,[R14 + CONTADOR]
+	mov byte [rax + CONTADOR], dl
+	sub qword CONTADOR, 1
+	jz copiando
 	
+	;mov rdi, rax
+	;call printf
+	
+	pop rbp
+	ret
+	;rbp            0x7fffffffcdc2	0x7fffffffcdc2
+	;
 	
 ;seleccion *crear_seleccion(char *pais, double alturaPromedio, lista *jugadores)
 crear_seleccion:
