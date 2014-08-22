@@ -223,7 +223,7 @@ crear_seleccion:
 	
 	add rsp, 8
 	pop qword [rax + OFFSET_JUGADORES_S] 
-	pop [rax + OFFSET_ALTURA_S]; ver cuanto mide un double
+	pop qword [rax + OFFSET_ALTURA_S]; ver cuanto mide un double
 	
 	pop rdi
 	mov rsi, rax
