@@ -99,7 +99,7 @@ lista_crear:
 	mov rdi, LISTA_SIZE
 	call malloc
 	mov qword [rax + OFFSET_PRIMERO], NULL
-	mov qword[rax + OFFSET_PRIMERO], NULL
+	mov qword[rax + OFFSET_ULTIMO], NULL
 	
 	pop rbp
 	ret
@@ -154,39 +154,43 @@ lista_imprimir_f:
 ;jugador *crear_jugador (char *nombre, char *pais, char numero, unsigned int altura)
 
 
-%define PUNTERO_A_JUGADOR R13
+%define PUNTERO_A_JUGADOR R15
 crear_jugador:
 	push rbp
 	mov rbp, rsp
-	sub rsp, 46; para que quede alineada me pido un multiplo de 16 y fue
+	push R15
+	push RBX
+	push R12
+	push R13
+	push R14
 	
-	mov qword [rbp+ 16 + OFFSET_NOMBRE_J], rdi
-	mov qword [rbp+ 16 + OFFSET_PAIS_J], rsi
-	mov byte [rbp+ 16 + OFFSET_NUMERO_J], dl
-	mov dword [rbp+ 16 + OFFSET_ALTURA_J], ecx
+	mov qword RBX, rdi
+	mov qword R12, rsi
+	mov byte R13b, dl
+	mov dword R14d, ecx
 
 	mov rdi, JUGADOR_SIZE
 	call malloc
 	
 	mov PUNTERO_A_JUGADOR, rax
 	
-	mov rdi , [rbp + 16 + OFFSET_NOMBRE_J]
+	mov rdi , RBX
 	call copiar_cadena
 	mov [PUNTERO_A_JUGADOR + OFFSET_NOMBRE_J], rax
 	
-	
-	mov rdi, [rbp + 16 + OFFSET_PAIS_J]
+	mov rdi, R12
 	call copiar_cadena
 	mov [PUNTERO_A_JUGADOR + OFFSET_PAIS_J], rax
 	
-	mov byte al, [rbp+ 16 + OFFSET_NUMERO_J]; byte
-	mov [PUNTERO_A_JUGADOR + OFFSET_NUMERO_J], al
+	mov [PUNTERO_A_JUGADOR + OFFSET_NUMERO_J], R13b
 	
-	mov dword eax, [rbp+ 16 + OFFSET_ALTURA_J];dword
-	mov [PUNTERO_A_JUGADOR + OFFSET_ALTURA_J], eax	
-	
-	add rsp,46
-	
+	mov [PUNTERO_A_JUGADOR + OFFSET_ALTURA_J], R14d
+
+	pop R14
+	pop R13
+	pop R12
+	pop RBX
+	pop R15
 	pop rbp
 	ret
 
@@ -228,11 +232,12 @@ imprimir_jugador:
 	; COMPLETAR AQUI EL CODIGO
 
 %define CONTADOR R15
-
-;copiar cadena toma registro rdi, y genera una copia que devuelve por rax, no modifica R13, convencion FN
+;copiar cadena toma registro rdi, y genera una copia que devuelve por rax
 copiar_cadena:
 	push rbp
 	mov rbp, rsp
+	push R14
+	push R15
 	mov qword R14, rdi
 	
 	mov qword CONTADOR, 0
@@ -240,21 +245,20 @@ loop:	cmp byte [rdi + CONTADOR],0
 	jz fin_cadena
 	add qword CONTADOR,1
 	jmp loop
-fin_cadena:	
-	add CONTADOR, 5 ; ver si lo puedo sacar
+fin_cadena:
+
 	mov qword rdi, CONTADOR
 	call malloc
-	sub CONTADOR, 4
+	DEC CONTADOR
 copiando:
 	mov dl ,[R14 + CONTADOR]
 	mov byte [rax + CONTADOR], dl
-	sub qword CONTADOR, 1
-	jz copiando
-	
-	;mov rdi, rax
-	;call printf
-	
-	pop rbp
+	DEC CONTADOR
+	jnz copiando
+
+	pop R15
+	pop R14
+	pop rbp	
 	ret
 	;rbp            0x7fffffffcdc2	0x7fffffffcdc2
 	;

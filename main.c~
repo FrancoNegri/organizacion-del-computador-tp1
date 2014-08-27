@@ -25,15 +25,15 @@ int testNodo()
 
 int testJugador()
 {
-    char *nombre = "pepe \n \0";
-    char *pais = "pepe \n \0";
+    char *nombre = "pepe";
+    char *pais = "pepe";
     printf("Creando jugador...\n");
     jugador *pepe = crear_jugador(nombre,pais,'4',30);
     printf("Ok!\n");
     //printf("Altura: %d \n",pepe->numero);
     //printf("Nombre: %s \n",pepe->nombre);
     //printf("Pais: %s \n",pepe->pais);
-    borrar_jugador(pepe)
+    borrar_jugador(pepe);
     return 0;
 }
 
