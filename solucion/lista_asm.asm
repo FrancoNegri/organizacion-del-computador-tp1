@@ -1,5 +1,5 @@
 extern malloc, free, printf
-
+;rdi rsi rdx rcx
 
 global nodo_crear
 global lista_crear
@@ -21,6 +21,7 @@ global insertar_ordenado
 global mapear
 global ordenar_lista_jugadores
 global altura_promedio
+global nodo_borrar
 
 extern filtrar_jugadores
 extern insertar_ultimo
@@ -74,6 +75,28 @@ section .data
 section .text
 
 
+;void debugPrint(char* c, int long)
+debugPrint:
+	push rbp
+	mov rbp, rsp
+	push rax
+	push rbx 
+	push rcx
+	push rdx
+
+	mov rax, 4     ; funcion 4
+   	mov rbx, 1     ; stdout
+   	mov rcx, rdi
+   	mov rdx, rsi
+   	int 0x80
+
+	pop rdx
+	pop rcx
+	pop rbx
+	pop rax
+	pop rdX
+	ret
+
 %define CONTADOR R15
 ;copiar cadena toma registro rdi, y genera una copia que devuelve por rax
 copiar_cadena:
@@ -84,25 +107,41 @@ copiar_cadena:
 	mov qword R14, rdi
 	
 	mov qword CONTADOR, 0
-loop:	cmp byte [rdi + CONTADOR],0
-	jz fin_cadena
-	add qword CONTADOR,1
-	jmp loop
-fin_cadena:
 
+contarCaracteres:	
+	cmp byte [R14 + CONTADOR],0
+	jz fin_contarCaracteres
+	INC qword CONTADOR
+	jmp contarCaracteres
+fin_contarCaracteres:
+	INC qword CONTADOR
 	mov qword rdi, CONTADOR
 	call malloc
-copiando:
+
+	mov qword CONTADOR, 0
+
+copiando:	
 	mov dl ,[R14 + CONTADOR]
 	mov byte [rax + CONTADOR], dl
-	DEC CONTADOR
-	jnz copiando
+	cmp byte [R14 + CONTADOR],0
+	jz fin_fun_copiar
+	INC CONTADOR
+	jmp copiando
+	
+	
+fin_fun_copiar:
+
+	;debugin
+	;mov rdi, rax
+	;mov rsi, CONTADOR;
+	;call debugPrint
 
 	pop R15
 	pop R14
 	pop rbp	
 	ret
 
+;nodo nodo_borrar(nodo *n, tipo_funcion_borrar f)
 nodo_borrar:
     push rbp
     mov rbp, rsp
@@ -187,10 +226,10 @@ crear_jugador:
 	push R13
 	push R14
 	
-	mov qword RBX, rdi
-	mov qword R12, rsi
-	mov byte R13b, dl
-	mov dword R14d, ecx
+	mov qword RBX, rdi ;NOMBRE
+	mov qword R12, rsi ;Pais
+	mov byte R13b, dl ;Numero
+	mov dword R14d, ecx ; altura
 
 	mov rdi, JUGADOR_SIZE
 	call malloc
@@ -209,6 +248,8 @@ crear_jugador:
 	
 	mov [PUNTERO_A_JUGADOR + OFFSET_ALTURA_J], R14d
 
+	mov RAX, PUNTERO_A_JUGADOR; SI NO DEVUELVO LO QUE TENGO QUE DEVOLVER CLARO QUE ME VA A DAR SIGFOULT!!!!
+
 	pop R14
 	pop R13
 	pop R12
@@ -218,7 +259,99 @@ crear_jugador:
 	ret
 
 menor_jugador:
-	; COMPLETAR AQUI EL CODIGO
+	push rbp
+	mov rbp, rsp
+	push rdi
+	push rsi
+
+	mov RSI, [RDI + OFFSET_NOMBRE_J]
+	mov rdi, [RDI + OFFSET_NOMBRE_J]
+	call compararStrings
+
+	pop rsi
+	pop rdi
+
+	cmp rax , 0
+	jz j1Mayor
+
+	cmp rax , 1
+	jz j2Mayor
+
+	;si paso estos dos chequeos, entonces es igual, tengo que desempatar por altura.
+	mov dword edi,[RDI + OFFSET_ALTURA_J]
+	mov dword esi, [RSI + OFFSET_ALTURA_J]
+	cmp dword rdi , rsi 
+	js j1Mayor
+	jmp j2Mayor
+
+
+j1Mayor:
+	mov rax, FALSE
+	jmp fin_fun_menor
+j2Mayor:
+	mov rax, TRUE
+	jmp fin_fun_menor
+fin_fun_menor:
+	pop rbp
+	ret
+
+; devuelve:
+;			0 -> RDI mayor
+;			1 -> RSI mayor
+;			2 -> iguales
+compararStrings:
+	push rbp
+	mov rbp, rsp
+	push R13
+	push R15
+	push R14
+
+	mov R13, 0
+
+chekeando:
+	mov byte R15b, [RDI + R13]
+	mov byte R14b, [RSI + R13]
+	cmp byte R15b,R14b 
+	jnz letraDistinta
+	INC R13
+
+	cmp byte R15b, 0
+	jz rdiEsCero
+
+	cmp byte R14b, 0
+	jz rsiEsCero
+
+	jmp chekeando
+
+letraDistinta:
+	js rdiMayor
+	mov rax, 1
+	jmp fin_fun_comparar
+rdiMayor:
+	mov rax, 0
+	jmp fin_fun_comparar
+
+rdiEsCero:
+	cmp byte R14b, 0
+	jz ambosCero
+	;si no son amobos cero, RSI es mayor
+	mov rax, 1
+	jmp fin_fun_comparar
+rsiEsCero:
+	;RDI no es 0 y RSI si, RDI mayor
+	mov rax, 0
+	jmp fin_fun_comparar
+
+ambosCero: 
+	mov rax, 2
+	jmp fin_fun_comparar
+
+fin_fun_comparar:
+	pop R14
+	pop R15
+	pop R13
+	pop rbp
+	ret
 
 normalizar_jugador:
 	; COMPLETAR AQUI EL CODIGO
@@ -249,6 +382,7 @@ borrar_jugador:
 	pop rbp
 	ret
 
+;void imprimir_jugador(jugador *j, FILE *file)
 imprimir_jugador:
 	; COMPLETAR AQUI EL CODIGO
 

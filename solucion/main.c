@@ -4,6 +4,7 @@
 int testSizes();
 int testJugador();
 int testNodo();
+
 int main(void) {
 
     testSizes();
@@ -26,13 +27,21 @@ int testNodo()
 int testJugador()
 {
     char *nombre = "pepe";
+    char *nombre2 = "papo";
     char *pais = "pepe";
     printf("Creando jugador...\n");
     jugador *pepe = crear_jugador(nombre,pais,'4',30);
+    jugador *papo = crear_jugador(nombre2,pais,'4',30);
     printf("Ok!\n");
-    printf("Altura: %d \n",pepe->numero);
+    printf("Altura: %c \n",pepe->numero);
     printf("Nombre: %s \n",pepe->nombre);
     printf("Pais: %s \n",pepe->pais);
+
+    if(menor_jugador(pepe,papo))
+    {
+        printf("Menor jugador, papo\n");
+    }
+    borrar_jugador(papo);
     borrar_jugador(pepe);
     return 0;
 }
