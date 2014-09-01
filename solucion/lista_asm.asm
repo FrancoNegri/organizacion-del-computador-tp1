@@ -1,4 +1,4 @@
-extern malloc, free, printf
+extern malloc, free, fprintf
 ;rdi rsi rdx rcx
 
 global nodo_crear
@@ -70,10 +70,99 @@ section .rodata
 
 
 section .data
-
+	msg:  DB '%s %s %c %u', 10,0
 
 section .text
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;; FUNCIONES AUXILIARES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;void normalizar_string(char*)
+normalizar_string:
+	push rbp
+	mov rbp, rsp
+	push r15
+	sub rsp, 8
+
+	mov r15, 0
+
+normalizando:
+	cmp byte [rdi + R15],0
+	jz finNormalizacion
+	cmp byte [rdi + R15],97
+	js incrementar
+	cmp byte [rdi + R15], 122
+	jns incrementar
+	sub byte [rdi + R15], 32
+incrementar:
+	INC qword R15
+	jmp normalizando
+finNormalizacion:
+	add rsp, 8
+	pop r15
+	pop rbp
+	ret
+
+; devuelve:
+;			0 -> RDI mayor
+;			1 -> RSI mayor
+;			2 -> iguales
+compararStrings:
+	push rbp
+	mov rbp, rsp
+	push R13
+	push R15
+	push R14
+
+	mov R13, 0
+
+chekeando:
+	mov byte R15b, [RDI + R13]
+	mov byte R14b, [RSI + R13]
+	cmp byte R15b,R14b 
+	jnz letraDistinta
+	INC R13
+
+	cmp byte R15b, 0
+	jz rdiEsCero
+
+	cmp byte R14b, 0
+	jz rsiEsCero
+
+	jmp chekeando
+
+letraDistinta:
+	js rdiMayor
+	mov rax, 1
+	jmp fin_fun_comparar
+rdiMayor:
+	mov rax, 0
+	jmp fin_fun_comparar
+
+rdiEsCero:
+	cmp byte R14b, 0
+	jz ambosCero
+	;si no son amobos cero, RSI es mayor
+	mov rax, 1
+	jmp fin_fun_comparar
+rsiEsCero:
+	;RDI no es 0 y RSI si, RDI mayor
+	mov rax, 0
+	jmp fin_fun_comparar
+
+ambosCero: 
+	mov rax, 2
+	jmp fin_fun_comparar
+
+fin_fun_comparar:
+	pop R14
+	pop R15
+	pop R13
+	pop rbp
+	ret
 
 ;void debugPrint(char* c, int long)
 debugPrint:
@@ -141,6 +230,50 @@ fin_fun_copiar:
 	pop rbp	
 	ret
 
+
+;jugador* copiar_jugador(jugador *unJugador)
+copiar_jugador:
+	push rbp
+	mov rbp, rsp
+	push RBX
+	push R12
+	push R13
+	push R14
+	push R15
+
+	mov R15, rdi
+
+	;Copio el nombre
+	mov rdi, [R15+ OFFSET_NOMBRE_J]
+	call copiar_cadena
+	mov qword RBX, rax ;NOMBRE
+
+	;copio el pais
+	mov rdi, [R15+ OFFSET_PAIS_J]
+	call copiar_cadena
+	mov qword R12, rax ;pais
+
+	;copia el resto
+	mov byte R13b, [R15+ OFFSET_NUMERO_J];Numero
+	mov dword R14d,[R15+ OFFSET_ALTURA_J]  ; altura
+
+	mov rdi, JUGADOR_SIZE
+	call malloc
+
+	mov qword [rax+ OFFSET_NOMBRE_J], RBX ;NOMBRE
+	mov qword [rax+ OFFSET_PAIS_J], R12 ;pais
+	mov byte [rax+ OFFSET_NUMERO_J], R13b ;Numero
+	mov dword [rax+ OFFSET_ALTURA_J], R14d  ; altura	
+
+	pop R15
+	pop R14
+	pop R13
+	pop R12
+	pop RBX
+	pop rbp
+	ret
+
+
 ;nodo nodo_borrar(nodo *n, tipo_funcion_borrar f)
 nodo_borrar:
     push rbp
@@ -159,6 +292,34 @@ nodo_borrar:
     ret
 
 
+;void normalizar_altura(*int altura)
+normalizar_altura:
+	push rbp
+	mov rbp, rsp
+	push r15
+	sub rsp, 8
+
+	mov r15d, 0
+
+normalizando_altura:
+	sub dword [rdi], 30
+	js finNormalizacionAltura
+	INC dword r15d
+	jmp normalizando_altura
+
+finNormalizacionAltura:
+	mov [rdi], r15d
+
+	add rsp, 8
+	pop r15
+	pop rbp
+	ret
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;FIN FUNCIONES AUXILIARES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; FUNCIONES OBLIGATORIAS. PUEDEN CREAR LAS FUNCIONES AUXILIARES QUE CREAN CONVENIENTES
 
 nodo_crear:
@@ -194,9 +355,9 @@ lista_borrar:
 
 	push rdi
 	sub rsp, 8
-	mov rdi, [rdi]
+	mov rdi, [rdi + OFFSET_PRIMERO]
 	
-LOOP_N:	cmp qword [rdi], NULL
+LOOP_N:	cmp qword rdi, NULL
 	JZ FIN
 	call nodo_borrar
 	mov rdi, rax
@@ -210,10 +371,18 @@ FIN:
 	ret
 
 lista_imprimir:
+	push rbp
+	mov rbp, rsp
 	; COMPLETAR AQUI EL CODIGO
+	pop rbp
+	ret
 
 lista_imprimir_f:
+	push rbp
+	mov rbp, rsp
 	; COMPLETAR AQUI EL CODIGO
+	pop rbp
+	ret
 
 
 %define PUNTERO_A_JUGADOR R15
@@ -280,8 +449,8 @@ menor_jugador:
 	;si paso estos dos chequeos, entonces es igual, tengo que desempatar por altura.
 	mov dword edi,[RDI + OFFSET_ALTURA_J]
 	mov dword esi, [RSI + OFFSET_ALTURA_J]
-	cmp dword rdi , rsi 
-	js j1Mayor
+	cmp dword edi , esi 
+	jns j1Mayor
 	jmp j2Mayor
 
 
@@ -295,69 +464,53 @@ fin_fun_menor:
 	pop rbp
 	ret
 
-; devuelve:
-;			0 -> RDI mayor
-;			1 -> RSI mayor
-;			2 -> iguales
-compararStrings:
+
+
+;jugador *normalizar_jugador(jugador *j)
+normalizar_jugador:
 	push rbp
 	mov rbp, rsp
-	push R13
 	push R15
-	push R14
+	sub rsp, 8
 
-	mov R13, 0
+	call copiar_jugador
 
-chekeando:
-	mov byte R15b, [RDI + R13]
-	mov byte R14b, [RSI + R13]
-	cmp byte R15b,R14b 
-	jnz letraDistinta
-	INC R13
+	mov R15, rax
 
-	cmp byte R15b, 0
-	jz rdiEsCero
+	lea rdi, [R15 + OFFSET_ALTURA_J]
+	call normalizar_altura
 
-	cmp byte R14b, 0
-	jz rsiEsCero
+	mov rdi, [R15 + OFFSET_NOMBRE_J]
+	call normalizar_string
 
-	jmp chekeando
+	mov rax, r15
 
-letraDistinta:
-	js rdiMayor
-	mov rax, 1
-	jmp fin_fun_comparar
-rdiMayor:
-	mov rax, 0
-	jmp fin_fun_comparar
-
-rdiEsCero:
-	cmp byte R14b, 0
-	jz ambosCero
-	;si no son amobos cero, RSI es mayor
-	mov rax, 1
-	jmp fin_fun_comparar
-rsiEsCero:
-	;RDI no es 0 y RSI si, RDI mayor
-	mov rax, 0
-	jmp fin_fun_comparar
-
-ambosCero: 
-	mov rax, 2
-	jmp fin_fun_comparar
-
-fin_fun_comparar:
-	pop R14
-	pop R15
-	pop R13
+	add rsp, 8
+	pop r15
 	pop rbp
 	ret
 
-normalizar_jugador:
-	; COMPLETAR AQUI EL CODIGO
+
 
 pais_jugador:
-	; COMPLETAR AQUI EL CODIGO
+	push rbp
+	mov rbp, rsp
+
+	mov RSI, [RDI + OFFSET_PAIS_J]
+	mov rdi, [RDI + OFFSET_PAIS_J]
+
+	call compararStrings
+
+	cmp rax, 2
+	jz pais_jugador_true
+	mov rax, FALSE
+	jmp fin_pais_jugador
+pais_jugador_true:
+	mov rax, TRUE
+fin_pais_jugador:
+	pop rbp
+	ret
+
 
 borrar_jugador:
 	push rbp
@@ -383,16 +536,30 @@ borrar_jugador:
 	ret
 
 ;void imprimir_jugador(jugador *j, FILE *file)
+
 imprimir_jugador:
-	; COMPLETAR AQUI EL CODIGO
+	push rbp
+	mov rbp, rsp
+
+
+	mov qword rdx, [rdi + OFFSET_NOMBRE_J]
+	mov qword rcx, [rdi + OFFSET_PAIS_J]
+	mov byte r8b, [rdi + OFFSET_NUMERO_J]
+	mov dword r9d, [rdi + OFFSET_ALTURA_J]
+	mov rdi, rsi ;FILE
+	mov rsi, msg ;string
+	call fprintf
+
+	pop rbp
+	ret
 
 crear_seleccion:
 	push rbp
 	mov rbp, rsp
 	
 	push RDI;D
-	push rsi;D
-	push rdx;A
+	push rsi;A
+	push rdx;D
 	
 	sub rsp,8;A
 	
@@ -411,10 +578,23 @@ crear_seleccion:
 	ret
 
 menor_seleccion:
+	push rbp
+	mov rbp, rsp
 	; COMPLETAR AQUI EL CODIGO
+	pop rbp
+	ret
 
+;jugador *primer_jugador(seleccion *s)
 primer_jugador:
-	; COMPLETAR AQUI EL CODIGO
+	push rbp
+	mov rbp, rsp
+
+	mov rdi, [rdi + OFFSET_JUGADORES_S]; me muevo a la lista
+	lea rdi, [rdi + OFFSET_PRIMERO]; me muevo al primer jugador
+	call copiar_jugador
+
+	pop rbp
+	ret
 
 borrar_seleccion:
 	push rbp
@@ -423,6 +603,8 @@ borrar_seleccion:
 	push rdi;D
 	sub rsp,8;A
 	
+	;borrar LISTAAA!!!
+
 	mov rdi, [rdi + OFFSET_PAIS_S]
 	call free
 	
@@ -433,18 +615,40 @@ borrar_seleccion:
 	pop rbp
 	ret
 
+
+
 imprimir_seleccion:
+	push rbp
+	mov rbp, rsp
 	; COMPLETAR AQUI EL CODIGO
+	pop rbp
+	ret
 
 insertar_ordenado:
+	push rbp
+	mov rbp, rsp
 	; COMPLETAR AQUI EL CODIGO
+	pop rbp
+	ret
 
 altura_promedio:
+	push rbp
+	mov rbp, rsp
 	; COMPLETAR AQUI EL CODIGO
+	pop rbp
+	ret
 
 ordenar_lista_jugadores:
+	push rbp
+	mov rbp, rsp
 	; COMPLETAR AQUI EL CODIGO
+	pop rbp
+	ret
 
 mapear:
+	push rbp
+	mov rbp, rsp
 	; COMPLETAR AQUI EL CODIGO
+	pop rbp
+	ret
 
