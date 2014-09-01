@@ -8,16 +8,20 @@ int testJugador2();
 int testLista();
 int testJugador3();
 int testJugador4();
+int testCompararStrings();
+int compararStrings(char *s1, char *s2);
 
 int main(void) {
 
-    testSizes();
-    testNodo();
-    testJugador();
-    testJugador2();
-    testJugador3();
-    testJugador4();
+//    testSizes();
+//    testNodo();
+//   testJugador();
+//    testJugador2();
+//    testJugador3();
+//   testJugador4();
     testLista();
+
+    testCompararStrings();
 
     return 0;
 }
@@ -117,15 +121,33 @@ int testJugador4()
 
 int testLista()
 {
+    char *nombre = "Pepe";
+    char *pais = "pepe";
+    jugador *pepe = crear_jugador(nombre ,pais,'4',196);
     lista *miLista;
+
     printf("Creando Lista...\n");
     miLista = lista_crear();
+
+    insertar_ordenado(miLista,(void*)pepe, (tipo_funcion_cmp)&menor_jugador);
+
+
+
+
     printf("Borrando Lista...\n");
-    lista_borrar(miLista, NULL);
+    lista_borrar(miLista, (tipo_funcion_borrar)&borrar_jugador);
     printf("Ok!\n");
     return 0;
 }
 
+int testCompararStrings()
+{
+    char *s1 = "b";
+    char *s2 = "a";
+    if(compararStrings(s1,s2) == 2)
+        printf("exito! \n");
+    return 0;
+}
 
 
 

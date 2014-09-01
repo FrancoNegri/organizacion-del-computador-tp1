@@ -22,6 +22,7 @@ global mapear
 global ordenar_lista_jugadores
 global altura_promedio
 global nodo_borrar
+global compararStrings
 
 extern filtrar_jugadores
 extern insertar_ultimo
@@ -71,6 +72,7 @@ section .rodata
 
 section .data
 	msg:  DB '%s %s %c %u', 10,0
+	dbug:  DB 'borro un nodo', 10,0
 
 section .text
 
@@ -274,9 +276,9 @@ copiar_jugador:
 	ret
 
 
-;nodo nodo_borrar(nodo *n, tipo_funcion_borrar f)
+;nodo* nodo_borrar(nodo *n, tipo_funcion_borrar f)
 nodo_borrar:
-    push rbp
+   push rbp
     mov rbp, rsp
     push qword [rdi + OFFSET_SIG]
     push rdi
@@ -290,6 +292,7 @@ nodo_borrar:
     pop rax
     pop rbp
     ret
+
 
 
 ;void normalizar_altura(*int altura)
@@ -349,24 +352,27 @@ lista_crear:
 	pop rbp
 	ret
 
+;void lista_borrar(lista *l, tipo_funcion_borrar f)
 lista_borrar:
 	push rbp
 	mov rbp, rsp
-
+	push r15
 	push rdi
-	sub rsp, 8
+	mov r15, rsi
+
 	mov rdi, [rdi + OFFSET_PRIMERO]
-	
-LOOP_N:	cmp qword rdi, NULL
+LOOP_N:
+	cmp qword rdi, NULL
 	JZ FIN
+	mov rsi, r15 
 	call nodo_borrar
 	mov rdi, rax
 	JMP LOOP_N
-FIN:	
-	add rsp, 8
-	pop rdi
+FIN:
+	mov rdi, r15
 	call free; libero la lista
-	
+	pop rdi
+	pop r15
 	pop rbp
 	ret
 
@@ -433,7 +439,7 @@ menor_jugador:
 	push rdi
 	push rsi
 
-	mov RSI, [RDI + OFFSET_NOMBRE_J]
+	mov RSI, [RSI + OFFSET_NOMBRE_J]
 	mov rdi, [RDI + OFFSET_NOMBRE_J]
 	call compararStrings
 
@@ -624,10 +630,61 @@ imprimir_seleccion:
 	pop rbp
 	ret
 
+;void insertar_ordenado(lista *l, void *datos, tipo_funcion_cmp f)
 insertar_ordenado:
 	push rbp
 	mov rbp, rsp
-	; COMPLETAR AQUI EL CODIGO
+	push R15
+	push R14
+	push R13
+	push R12
+	push r11
+	sub rsp, 8
+
+	mov r15, rdi
+	mov r14, rsi
+	mov r13, rdX
+
+	mov rdi, rsi
+	call nodo_crear
+	mov r11, rax
+
+	mov R12, [R15 + OFFSET_PRIMERO]
+	cmp R12, NULL
+	jnz buscarLugarParaInsertar
+	;lista vacia, lo seteo como primero y ultimo y listo
+	mov [R15 + OFFSET_PRIMERO], r11
+	mov [R15 + OFFSET_ULTIMO], r11
+	jmp finIncercion
+
+buscarLugarParaInsertar:
+	lea rdi, [R12 + OFFSET_DATOS]
+	mov rsi, r14
+	call r13 ; es el nodo en que estoy parado mas chico que el que quiero agregar?
+	cmp rax, 0
+	jz  agregoElNodo;no, entonces lo agrego
+	mov r12, [r12 + OFFSET_SIG]
+	jmp buscarLugarParaInsertar
+agregoElNodo:
+	mov [r11 + OFFSET_ANT], r12
+
+	push qword [r12 + OFFSET_SIG]
+	pop qword [r11 + OFFSET_SIG]
+
+	lea R12,[R12 + OFFSET_SIG];seteo el puntero del siguiente del nodo anterior al nuevo nodo. 
+	mov r12, r11
+
+	mov r12, [r11 + OFFSET_SIG]
+	lea R12,[R12 + OFFSET_ANT]
+	mov r12, r11
+
+finIncercion:
+	add rsp, 8
+	pop r11
+	pop R12
+	pop R13
+	pop	R14
+	pop R13
 	pop rbp
 	ret
 
