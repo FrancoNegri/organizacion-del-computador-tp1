@@ -13,12 +13,12 @@ int compararStrings(char *s1, char *s2);
 
 int main(void) {
 
-    //testSizes();
-    //testNodo();
-   //testJugador();
-    //testJugador2();
-    //testJugador3();
-   //testJugador4();
+    testSizes();
+    testNodo();
+   testJugador();
+    testJugador2();
+    testJugador3();
+   testJugador4();
     testLista();
 
     testCompararStrings();
