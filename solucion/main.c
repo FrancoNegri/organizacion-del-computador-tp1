@@ -21,7 +21,7 @@ int main(void) {
    //testJugador4();
     testLista();
 
-    testCompararStrings();
+    //testCompararStrings();
 
     return 0;
 }
@@ -125,15 +125,28 @@ int testLista()
     char *nombre = "Pepe";
     char *pais = "pepe";
     jugador *pepe = crear_jugador(nombre ,pais,'4',196);
+    
+    char *nombre2 = "Pepe2";
+    char *pais2 = "pepe";
+    jugador *pepe2 = crear_jugador(nombre2 ,pais2,'4',196);
+    
+    char *nombre3 = "Pepe3";
+    char *pais3 = "pepe";
+    jugador *pepe3 = crear_jugador(nombre3 ,pais3,'4',196);
+    
     lista *miLista;
 
     printf("Creando Lista...\n");
     miLista = lista_crear();
-
+     
+    printf("Insertando jugador 1\n");
     insertar_ordenado(miLista,(void*)pepe, (tipo_funcion_cmp)&menor_jugador);
+    
+    printf("Insertando jugador 2\n");
+    insertar_ordenado(miLista,(void*)pepe2, (tipo_funcion_cmp)&menor_jugador);
 
-
-
+    printf("Insertando jugador 3\n");
+    insertar_ordenado(miLista,(void*)pepe3, (tipo_funcion_cmp)&menor_jugador);
 
     printf("Borrando Lista...\n");
     lista_borrar(miLista, (tipo_funcion_borrar)&borrar_jugador);

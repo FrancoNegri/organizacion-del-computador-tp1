@@ -368,7 +368,7 @@ lista_borrar:
 .LOOP_N:
 	cmp qword rdi, NULL
 	JZ .FIN
-	mov rsi, r15 
+	mov rsi, r15
 	call nodo_borrar
 	mov rdi, rax
 	JMP .LOOP_N
@@ -439,6 +439,7 @@ crear_jugador:
 	pop rbp
 	ret
 
+;bool menor_jugador(jugador *j1, jugador *j2)
 menor_jugador:
 	push rbp
 	mov rbp, rsp
@@ -633,18 +634,23 @@ borrar_seleccion:
 	push rbp
 	mov rbp, rsp
 	
-	push rdi;D
+	push r15;D
 	sub rsp,8;A
 	
-	;borrar LISTAAA!!!
+	mov r15, rdi
+	
+	mov rdi, [r15 + OFFSET_JUGADORES_S]
+	mov rsi, borrar_jugador
+	call lista_borrar
 
-	mov rdi, [rdi + OFFSET_PAIS_S]
+	mov rdi, [r15 + OFFSET_PAIS_S]
+	call free
+	
+	mov rdi, r15
 	call free
 	
 	add rsp,8;D
 	pop rdi;A
-	call free
-	
 	pop rbp
 	ret
 
@@ -661,11 +667,11 @@ imprimir_seleccion:
 insertar_ordenado:
 	push rbp
 	mov rbp, rsp
-	push R15
-	push R14
-	push R13
-	push R12
-	push r11
+	push R15; *l
+	push R14; *datos y luego de agregoElNodo nodo siguiente
+	push R13; funcion menor_jugador
+	push R12; nodo anterior 
+	push r11; nuevo nodo
 	sub rsp, 8
 
 	mov r15, rdi
@@ -685,7 +691,7 @@ insertar_ordenado:
 	jmp .finIncercion
 
 .buscarLugarParaInsertar:
-	lea rdi, [R12 + OFFSET_DATOS]
+	mov rdi, [R12 + OFFSET_DATOS]
 	mov rsi, r14
 	call r13 ; es el nodo en que estoy parado mas chico que el que quiero agregar?
 	cmp rax, 0
@@ -694,17 +700,16 @@ insertar_ordenado:
 	jmp .buscarLugarParaInsertar
 .agregoElNodo:
 	mov [r11 + OFFSET_ANT], r12
-
+	
 	push qword [r12 + OFFSET_SIG]
 	pop qword [r11 + OFFSET_SIG]
-
-	lea R12,[R12 + OFFSET_SIG];seteo el puntero del siguiente del nodo anterior al nuevo nodo. 
-	mov r12, r11
-
-	mov r12, [r11 + OFFSET_SIG]
-	lea R12,[R12 + OFFSET_ANT]
-	mov r12, r11
-
+	
+	mov [r12 + OFFSET_SIG], r11
+	
+	mov r14 ,[r11 + OFFSET_SIG]
+	mov [r11 + OFFSET_ANT], r11
+	
+	
 .finIncercion:
 	mov rax, 0
 	add rsp, 8
