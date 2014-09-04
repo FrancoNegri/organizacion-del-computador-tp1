@@ -1,2 +1,18 @@
 en borrar seleccion, primero tengo que llamar a borrar lista!!!
 bug en menor jugador, chequear codigo!!!
+
+
+lista_map(lista, fun)
+	creo una lista nueba
+	mapeo toda la lista
+	me guardo el primer y el ultimo nodo
+
+
+
+3 nodos
+nodo que quiero mapear
+nodo que ya mapie
+nodo que en el que voy a mapear
+
+
+FALTA SETEAR ALTURA PROMEDIO EN SELECCION!!

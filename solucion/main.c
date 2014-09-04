@@ -148,7 +148,10 @@ int testLista()
     printf("Insertando jugador 3\n");
     insertar_ordenado(miLista,(void*)pepe3, (tipo_funcion_cmp)&menor_jugador);
 
+    lista* B = mapear(miLista, (tipo_funcion_mapear)&normalizar_jugador);
+
     printf("Borrando Lista...\n");
+    lista_borrar(B, (tipo_funcion_borrar)&borrar_jugador);
     lista_borrar(miLista, (tipo_funcion_borrar)&borrar_jugador);
     printf("Ok!\n");
     return 0;

@@ -42,6 +42,7 @@ lista *lista_crear (void);
 void lista_borrar (lista *l, tipo_funcion_borrar f);
 void lista_imprimir (lista *l, char *nombre_archivo, tipo_funcion_imprimir f);
 void lista_imprimir_f (lista *l, FILE *file, tipo_funcion_imprimir f);
+lista* ordenar_lista(lista*, tipo_funcion_cmp);
 
 /** Funciones de jugador **/
 jugador *crear_jugador (char *nombre, char *pais, char numero, unsigned int altura);
