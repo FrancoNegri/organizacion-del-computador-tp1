@@ -10,18 +10,24 @@ int testJugador3();
 int testJugador4();
 int testCompararStrings();
 int compararStrings(char *s1, char *s2);
+int testJugadores();
+int testSeleccion();
 
 int main(void) {
 
-    //testSizes();
-    //testNodo();
-   //testJugador();
-    //testJugador2();
-    //testJugador3();
-   //testJugador4();
-    testLista();
+ //   testSizes();
+ //   testNodo();
+ //  testJugador();
+ //   testJugador2();
+ //   testJugador3();
+ //  testJugador4();
+ //   testLista();
 
-    //testCompararStrings();
+ //   testCompararStrings();
+
+ //   testJugadores();
+
+    testSeleccion();
 
     return 0;
 }
@@ -122,15 +128,15 @@ int testJugador4()
 
 int testLista()
 {
-    char *nombre = "Pepe";
+    char *nombre = "aaa";
     char *pais = "pepe";
     jugador *pepe = crear_jugador(nombre ,pais,'4',196);
     
-    char *nombre2 = "Pepe2";
+    char *nombre2 = "ccc";
     char *pais2 = "pepe";
     jugador *pepe2 = crear_jugador(nombre2 ,pais2,'4',196);
     
-    char *nombre3 = "Pepe3";
+    char *nombre3 = "bbb";
     char *pais3 = "pepe";
     jugador *pepe3 = crear_jugador(nombre3 ,pais3,'4',196);
     
@@ -147,6 +153,18 @@ int testLista()
 
     printf("Insertando jugador 3\n");
     insertar_ordenado(miLista,(void*)pepe3, (tipo_funcion_cmp)&menor_jugador);
+
+    nodo *unNodo = miLista->primero;
+    jugador *unj = unNodo->datos;
+    printf("Nombre: %s \n",unj->nombre);
+
+    unNodo = miLista->primero->sig;
+    unj = unNodo->datos;
+    printf("Nombre: %s \n",unj->nombre);
+
+    unNodo = miLista->primero->sig->sig;
+    unj = unNodo->datos;
+    printf("Nombre: %s \n",unj->nombre);
 
     lista* B = mapear(miLista, (tipo_funcion_mapear)&normalizar_jugador);
 
@@ -167,9 +185,6 @@ int testCompararStrings()
 }
 
 
-
-
-
 int testSizes()
 {
     int * puntero;
@@ -183,4 +198,58 @@ int testSizes()
     printf("Doble: %d \n",(int)sizeof(doble));
     return 0;
   
+}
+
+int testJugadores()
+{
+    lista* A = lista_crear();
+    jugador* Gino = crear_jugador("Ginobili", "Argentina", 6, 198);
+    jugador* GinoPies = normalizar_jugador(Gino);
+    insertar_ordenado(A, (void*)GinoPies, (tipo_funcion_cmp)&menor_jugador);
+    borrar_jugador(Gino);
+    Gino = A->primero->datos;
+    printf("NORMALIZADO\n");
+    printf("numero: %c \n",Gino->numero);
+    printf("Nombre: %s \n",Gino->nombre);
+    printf("Pais: %s \n",Gino->pais);
+    printf("Altura: %u \n",(unsigned int)Gino->altura);
+    lista_borrar(A, (tipo_funcion_borrar)&borrar_jugador);
+    return 0;
+}
+
+
+int testSeleccion()
+{
+    lista* A = lista_crear();
+    jugador* Gino = crear_jugador("Ginobili", "Argentina", 6, 198);
+    jugador* GinoPies = normalizar_jugador(Gino);
+    jugador* Gino2 = crear_jugador("Ginobili", "Argentina", 6, 198);
+    jugador* GinoPies2 = normalizar_jugador(Gino);
+    insertar_ordenado(A, (void*)GinoPies, (tipo_funcion_cmp)&menor_jugador);
+    insertar_ordenado(A, (void*)Gino, (tipo_funcion_cmp)&menor_jugador);
+    insertar_ordenado(A, (void*)GinoPies2, (tipo_funcion_cmp)&menor_jugador);
+    insertar_ordenado(A, (void*)Gino2, (tipo_funcion_cmp)&menor_jugador);
+    seleccion* w = crear_seleccion("Argentina", altura_promedio(A), A);
+    
+    
+
+    lista* B = lista_crear();
+    jugador* a = crear_jugador("a", "Argentina", 6, 143);
+    jugador* b = normalizar_jugador(Gino);
+    jugador* c = crear_jugador("b", "Argentina", 6, 400);
+    jugador* d= normalizar_jugador(Gino);
+    insertar_ordenado(B, (void*)a, (tipo_funcion_cmp)&menor_jugador);
+    insertar_ordenado(B, (void*)b, (tipo_funcion_cmp)&menor_jugador);
+    insertar_ordenado(B, (void*)c, (tipo_funcion_cmp)&menor_jugador);
+    insertar_ordenado(B, (void*)d, (tipo_funcion_cmp)&menor_jugador);
+    seleccion* j = crear_seleccion("Argentina", altura_promedio(B), B);
+
+    lista *listaDeSelecciones = lista_crear();
+    insertar_ordenado(listaDeSelecciones, w, (tipo_funcion_cmp)menor_seleccion);
+    insertar_ordenado(listaDeSelecciones, j, (tipo_funcion_cmp)menor_seleccion);
+
+
+    lista_borrar(listaDeSelecciones, (tipo_funcion_borrar)borrar_seleccion);
+    printf("OK\n");
+    return 0;
 }

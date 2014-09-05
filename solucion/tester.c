@@ -42,13 +42,13 @@ void caso1Elemento() {
   jugador* Gino = crear_jugador("Ginobili", "Argentina", 6, 198);
   jugador* GinoPies = normalizar_jugador(Gino);
   insertar_ordenado(A, (void*)GinoPies, (tipo_funcion_cmp)&menor_jugador);
-  //assert(abs(altura_promedio(A)-6.0)<EPS);
+  assert(abs(altura_promedio(A)-6.0)<EPS);
 
-  //imprimir_jugador(Gino, target);
+  imprimir_jugador(Gino, target);
   borrar_jugador(Gino);
-  //lista_imprimir_f(A, target, (tipo_funcion_imprimir)&imprimir_jugador);
-  //lista* TodasLasSelecciones = generar_selecciones(A);
-  //lista_borrar(TodasLasSelecciones, (tipo_funcion_borrar)&borrar_seleccion);
+  lista_imprimir_f(A, target, (tipo_funcion_imprimir)&imprimir_jugador);
+  lista* TodasLasSelecciones = generar_selecciones(A);
+  lista_borrar(TodasLasSelecciones, (tipo_funcion_borrar)&borrar_seleccion);
 	
   seleccion* solari = crear_seleccion("Argentina",22.3, A);
   jugador* primero = primer_jugador(solari);
@@ -149,7 +149,7 @@ void casoNElementos() {
 int main() {
   srand(20140830);
   remove("salida.caso1.txt");
-  caso1Elemento();
+//  caso1Elemento();
 
   remove("salida.caso2a.txt");
   remove("salida.caso2b.txt");

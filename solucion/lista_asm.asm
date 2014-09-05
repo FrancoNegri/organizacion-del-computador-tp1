@@ -72,9 +72,10 @@ section .rodata
 
 
 section .data
-	msg:  DB '%s %s %c %u', 10,0
+	msg:  DB '%s %s %d %u', 10,0
 	dbug:  DB 'borro un nodo', 10,0
 	lista_esta_vacia: DB '<vacia>', 10, 0
+	append: DB 97
 
 section .text
 
@@ -130,7 +131,7 @@ compararStrings:
 	xor R15, r15
 	mov byte R15b, [RDI + R13]
 	mov byte R14b, [RSI + R13]
-	cmp byte R15b,R14b 
+	cmp byte R15b,R14b; R14 - r15
 	jnz .letraDistinta
 	INC R13
 
@@ -143,7 +144,7 @@ compararStrings:
 	jmp .chekeando
 
 .letraDistinta:
-	js .rdiMayor
+	jns .rdiMayor
 	mov rax, 1
 	jmp .fin_fun_comparar
 .rdiMayor:
@@ -389,11 +390,12 @@ lista_borrar:
 lista_imprimir:
 	push rbp
 	mov rbp, rsp
+	sub rsp, 16
 	push rdi
 	push rdx
 
 	mov rdi, rsi
-	mov rsi, 'a'
+	mov rsi, append
 	call fopen
 
 	pop rdx
@@ -407,7 +409,7 @@ lista_imprimir:
 	add rsp,8
 	pop rdi
 	call fclose
-
+	add rsp, 16
 	pop rbp
 	ret
 
@@ -532,9 +534,9 @@ menor_jugador:
 	xor rsi, rsi
 	mov esi, eax
 	
-	cmp dword edi , esi 
-	jns .j1Mayor
-	jmp .j2Mayor
+	cmp dword edi , esi
+	JBE .j2Mayor
+	jmp .j1Mayor
 
 
 .j1Mayor:
@@ -544,7 +546,6 @@ menor_jugador:
 .j2Mayor:
 	xor rax, rax
 	mov eax, TRUE
-	jmp .fin_fun_menor
 .fin_fun_menor:
 	pop rbp
 	ret
@@ -603,7 +604,7 @@ borrar_jugador:
 	push rbp
 	mov rbp, rsp
 	
-	push 15;DESALINEADA
+	push r15;DESALINEADA
 	sub rsp, 8;Alineada
 
 	mov r15, rdi
@@ -626,18 +627,22 @@ borrar_jugador:
 imprimir_jugador:
 	push rbp
 	mov rbp, rsp
+	sub rsp, 16
 	
 	xor r8, r8
 	xor r9, r9
 
 	mov qword rdx, [rdi + OFFSET_NOMBRE_J]
 	mov qword rcx, [rdi + OFFSET_PAIS_J]
-	lea r8, [rdi + OFFSET_NUMERO_J]
+	
+	mov r8b, [rdi + OFFSET_NUMERO_J]
+
 	mov dword r9d, [rdi + OFFSET_ALTURA_J]
 	mov rdi, rsi ;FILE
 	mov rsi, msg ;string
 	call fprintf
 
+	add rsp, 16
 	pop rbp
 	ret
 
@@ -678,7 +683,15 @@ crear_seleccion:
 menor_seleccion:
 	push rbp
 	mov rbp, rsp
-	; COMPLETAR AQUI EL CODIGO
+
+
+	xor rax, rax
+	mov eax, TRUE
+
+
+
+
+
 	pop rbp
 	ret
 
@@ -688,7 +701,8 @@ primer_jugador:
 	mov rbp, rsp
 
 	mov rdi, [rdi + OFFSET_JUGADORES_S]; me muevo a la lista
-	mov rdi, [rdi + OFFSET_PRIMERO]; me muevo al primer jugador
+	mov rdi, [rdi + OFFSET_PRIMERO]; me muevo al primer nodo
+	mov rdi, [rdi + OFFSET_DATOS]; me muevo al jugador
 	call copiar_jugador
 
 	pop rbp
@@ -715,7 +729,7 @@ borrar_seleccion:
 	call free
 	
 	add rsp,8;D
-	pop rdi;A
+	pop r15
 	pop rbp
 	ret
 
@@ -736,7 +750,7 @@ insertar_ordenado:
 	push R14; *datos y luego de agregoElNodo nodo siguiente
 	push R13; funcion menor_jugador
 	push R12; nodo anterior 
-	push r11; nuevo nodo
+	push rbx; nuevo nodo
 	sub rsp, 8
 
 	mov r15, rdi
@@ -745,41 +759,52 @@ insertar_ordenado:
 
 	mov rdi, rsi
 	call nodo_crear
-	mov r11, rax
+	mov rbx, rax
 
 	mov R12, [R15 + OFFSET_PRIMERO]
 	cmp R12, NULL
 	jnz .buscarLugarParaInsertar
 	;lista vacia, lo seteo como primero y ultimo y listo
-	mov [R15 + OFFSET_PRIMERO], r11
-	mov [R15 + OFFSET_ULTIMO], r11
+	mov [R15 + OFFSET_PRIMERO], RBX
+	mov [R15 + OFFSET_ULTIMO], rbx
 	jmp .finIncercion
 
 .buscarLugarParaInsertar:
-	mov rdi, [R12 + OFFSET_DATOS]
-	mov rsi, r14
+	mov rdi, r14
+	mov rsi, [R12 + OFFSET_DATOS]
 	call r13 ; es el nodo en que estoy parado mas chico que el que quiero agregar?
 	cmp rax, 0
 	jz  .agregoElNodo;no, entonces lo agrego
+	cmp qword [r12 + OFFSET_SIG], NULL;llegue al final de la lista?
+	jz .agregoUltimo;si, entonces lo agrego
 	mov r12, [r12 + OFFSET_SIG]
-	; TENGO QUE VER QUE EL SIGUIENTE NO SEA CERO!!!!
 	jmp .buscarLugarParaInsertar
+
 .agregoElNodo:
-	mov [r11 + OFFSET_ANT], r12
+	mov [rbx + OFFSET_SIG], r12; seteo el nodo actual
 	
-	push qword [r12 + OFFSET_SIG]
-	pop qword [r11 + OFFSET_SIG]
-	
-	mov [r12 + OFFSET_SIG], r11
-	
-	mov r14 ,[r11 + OFFSET_SIG]
-	mov [r11 + OFFSET_ANT], r11
-	
-	
+	push qword [r12 + OFFSET_ANT]; seteo el nodo actual
+	pop qword [rbx + OFFSET_ANT]
+
+	mov [r12 + OFFSET_ANT], rbx; seteo el nodo sig
+
+	cmp qword [rbx + OFFSET_ANT], NULL
+	jz .agregoPrimero
+
+	mov r14 ,[rbx + OFFSET_ANT]; seteo el nodo ant
+	mov [r14 + OFFSET_SIG], rbx
+	jmp .finIncercion
+
+.agregoUltimo:
+	mov [rbx + OFFSET_ANT], r12; seteo el nodo actual
+	mov [r12 + OFFSET_SIG], rbx; seteo el nodo anterior
+	mov [R15 + OFFSET_ULTIMO], rbx
+	jmp .finIncercion
+.agregoPrimero:
+	mov [R15 + OFFSET_PRIMERO], rbx
 .finIncercion:
-	mov rax, r11
 	add rsp, 8
-	pop r11
+	pop rbx
 	pop R12
 	pop R13
 	pop R14
