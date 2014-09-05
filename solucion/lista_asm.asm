@@ -121,6 +121,7 @@ compararStrings:
 	push R13
 	push R15
 	push R14
+	sub rsp, 8
 
 	mov R13, 0
 
@@ -165,6 +166,7 @@ compararStrings:
 	jmp .fin_fun_comparar
 
 .fin_fun_comparar:
+	add rsp, 8
 	pop R14
 	pop R15
 	pop R13
@@ -241,7 +243,8 @@ copiar_jugador:
 	push R13
 	push R14
 	push R15
-
+	sub rsp, 8
+	
 	mov R15, rdi
 
 	;Copio el nombre
@@ -269,6 +272,7 @@ copiar_jugador:
 	mov byte [rax+ OFFSET_NUMERO_J], R13b ;Numero
 	mov dword [rax+ OFFSET_ALTURA_J], R14d  ; altura	
 
+	add rsp, 8
 	pop R15
 	pop R14
 	pop R13
@@ -447,14 +451,16 @@ lista_imprimir_f:
 
 
 %define PUNTERO_A_JUGADOR R15
+;jugador *crear_jugador(char *nombre, char *pais, char numero, unsigned int altura)
 crear_jugador:
 	push rbp
 	mov rbp, rsp
 	push R15
-	push RBX
-	push R12
-	push R13
 	push R14
+	push R13
+	push R12
+	push RBX
+	sub rsp, 8
 	
 	xor R13, R13
 	xor R14, R14
@@ -483,10 +489,11 @@ crear_jugador:
 
 	mov RAX, PUNTERO_A_JUGADOR; SI NO DEVUELVO LO QUE TENGO QUE DEVOLVER CLARO QUE ME VA A DAR SIGFOULT!!!!
 
-	pop R14
-	pop R13
-	pop R12
+	add rsp, 8
 	pop RBX
+	pop R12
+	pop R13
+	pop R14
 	pop R15
 	pop rbp
 	ret
@@ -596,22 +603,21 @@ borrar_jugador:
 	push rbp
 	mov rbp, rsp
 	
-	push rdi ;DESALINEADA
+	push 15;DESALINEADA
 	sub rsp, 8;Alineada
-	mov rdi,[rdi + OFFSET_NOMBRE_J]
+
+	mov r15, rdi
+	mov rdi,[r15 + OFFSET_NOMBRE_J]
 	call free
-	add rsp, 8;DESALINEADA
-	
-	pop rdi;ALINEADA
-	push rdi;DESALINEADA
-	sub rsp, 8;ALINEADA
-	mov rdi,[rdi + OFFSET_PAIS_J]
+
+	mov rdi,[r15 + OFFSET_PAIS_J]
 	call free
-	
-	add rsp, 8;DESALINEADA
-	pop rdi;ALINEADA
+
+	mov rdi, r15
 	call free
 	
+	add rsp, 8
+	pop r15
 	pop rbp
 	ret
 
@@ -626,7 +632,7 @@ imprimir_jugador:
 
 	mov qword rdx, [rdi + OFFSET_NOMBRE_J]
 	mov qword rcx, [rdi + OFFSET_PAIS_J]
-	mov byte r8b, [rdi + OFFSET_NUMERO_J]
+	lea r8, [rdi + OFFSET_NUMERO_J]
 	mov dword r9d, [rdi + OFFSET_ALTURA_J]
 	mov rdi, rsi ;FILE
 	mov rsi, msg ;string
@@ -645,10 +651,9 @@ crear_seleccion:
 	push r13;d
 	push r12;a
 	
-	mov r14, rdi
-	mov r13, rsi
-	mov r12, rdx
-	
+	mov r14, rdi; pais
+	mov r13, rsi; alturaPromedio
+	mov r12, rdx; jugadores
 	
 	mov rdi, SELECCION_SIZE
 	call malloc
@@ -683,7 +688,7 @@ primer_jugador:
 	mov rbp, rsp
 
 	mov rdi, [rdi + OFFSET_JUGADORES_S]; me muevo a la lista
-	lea rdi, [rdi + OFFSET_PRIMERO]; me muevo al primer jugador
+	mov rdi, [rdi + OFFSET_PRIMERO]; me muevo al primer jugador
 	call copiar_jugador
 
 	pop rbp
@@ -757,6 +762,7 @@ insertar_ordenado:
 	cmp rax, 0
 	jz  .agregoElNodo;no, entonces lo agrego
 	mov r12, [r12 + OFFSET_SIG]
+	; TENGO QUE VER QUE EL SIGUIENTE NO SEA CERO!!!!
 	jmp .buscarLugarParaInsertar
 .agregoElNodo:
 	mov [r11 + OFFSET_ANT], r12
@@ -771,7 +777,7 @@ insertar_ordenado:
 	
 	
 .finIncercion:
-	mov rax, 0
+	mov rax, r11
 	add rsp, 8
 	pop r11
 	pop R12

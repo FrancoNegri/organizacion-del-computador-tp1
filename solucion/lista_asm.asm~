@@ -1,4 +1,4 @@
-extern malloc, free, fprintf
+extern malloc, free, fprintf, fopen, fclose
 ;rdi rsi rdx rcx
 
 global nodo_crear
@@ -23,6 +23,7 @@ global ordenar_lista_jugadores
 global altura_promedio
 global nodo_borrar
 global compararStrings
+global ordenar_lista
 
 extern filtrar_jugadores
 extern insertar_ultimo
@@ -73,6 +74,7 @@ section .rodata
 section .data
 	msg:  DB '%s %s %c %u', 10,0
 	dbug:  DB 'borro un nodo', 10,0
+	lista_esta_vacia: DB '<vacia>', 10, 0
 
 section .text
 
@@ -119,6 +121,7 @@ compararStrings:
 	push R13
 	push R15
 	push R14
+	sub rsp, 8
 
 	mov R13, 0
 
@@ -163,6 +166,7 @@ compararStrings:
 	jmp .fin_fun_comparar
 
 .fin_fun_comparar:
+	add rsp, 8
 	pop R14
 	pop R15
 	pop R13
@@ -239,7 +243,8 @@ copiar_jugador:
 	push R13
 	push R14
 	push R15
-
+	sub rsp, 8
+	
 	mov R15, rdi
 
 	;Copio el nombre
@@ -267,6 +272,7 @@ copiar_jugador:
 	mov byte [rax+ OFFSET_NUMERO_J], R13b ;Numero
 	mov dword [rax+ OFFSET_ALTURA_J], R14d  ; altura	
 
+	add rsp, 8
 	pop R15
 	pop R14
 	pop R13
@@ -379,17 +385,67 @@ lista_borrar:
 	pop rbp
 	ret
 
+;void lista_imprimir(lista *l, char *nombre_archivo, tipo_funcion_imprimir f)
 lista_imprimir:
 	push rbp
 	mov rbp, rsp
-	; COMPLETAR AQUI EL CODIGO
+	push rdi
+	push rdx
+
+	mov rdi, rsi
+	mov rsi, 'a'
+	call fopen
+
+	pop rdx
+	pop rdi
+	push rax
+	sub rsp, 8
+	mov rsi, rax
+
+	call lista_imprimir_f
+	
+	add rsp,8
+	pop rdi
+	call fclose
+
 	pop rbp
 	ret
 
+;void lista_imprimir_f(lista *l, FILE *file, tipo_funcion_imprimir f)
 lista_imprimir_f:
 	push rbp
 	mov rbp, rsp
-	; COMPLETAR AQUI EL CODIGO
+	push r15; fun_imprimit(void, FILE)
+	push r14; nodo
+	push r13; FILE
+	sub rsp, 8
+
+	mov r15, rdx
+	mov r13, rsi
+
+	mov r14, [rdi + OFFSET_PRIMERO]
+	cmp r14, 0
+	jz .listaVacia
+.loop:
+	mov rdi, [r14 +OFFSET_DATOS]
+	mov rsi, r13
+	call r15
+	mov r14, [r14 + OFFSET_SIG]
+	cmp r14, 0
+	jz .fin
+	jmp .loop
+
+.listaVacia:
+	mov rdi, rsi ;FILE
+	mov rsi, r13
+	mov rsi, lista_esta_vacia
+	call fprintf
+
+.fin:
+	add rsp, 8
+	pop r13
+	pop r14
+	pop r15
 	pop rbp
 	ret
 
@@ -399,10 +455,11 @@ crear_jugador:
 	push rbp
 	mov rbp, rsp
 	push R15
-	push RBX
-	push R12
-	push R13
 	push R14
+	push R13
+	push R12
+	push RBX
+	sub rsp, 8
 	
 	xor R13, R13
 	xor R14, R14
@@ -431,10 +488,11 @@ crear_jugador:
 
 	mov RAX, PUNTERO_A_JUGADOR; SI NO DEVUELVO LO QUE TENGO QUE DEVOLVER CLARO QUE ME VA A DAR SIGFOULT!!!!
 
-	pop R14
-	pop R13
-	pop R12
+	add rsp, 8
 	pop RBX
+	pop R12
+	pop R13
+	pop R14
 	pop R15
 	pop rbp
 	ret
@@ -544,22 +602,21 @@ borrar_jugador:
 	push rbp
 	mov rbp, rsp
 	
-	push rdi ;DESALINEADA
+	push 15;DESALINEADA
 	sub rsp, 8;Alineada
-	mov rdi,[rdi + OFFSET_NOMBRE_J]
+
+	mov r15, rdi
+	mov rdi,[r15 + OFFSET_NOMBRE_J]
 	call free
-	add rsp, 8;DESALINEADA
-	
-	pop rdi;ALINEADA
-	push rdi;DESALINEADA
-	sub rsp, 8;ALINEADA
-	mov rdi,[rdi + OFFSET_PAIS_J]
+
+	mov rdi,[r15 + OFFSET_PAIS_J]
 	call free
-	
-	add rsp, 8;DESALINEADA
-	pop rdi;ALINEADA
+
+	mov rdi, r15
 	call free
 	
+	add rsp, 8
+	pop r15
 	pop rbp
 	ret
 
@@ -574,7 +631,7 @@ imprimir_jugador:
 
 	mov qword rdx, [rdi + OFFSET_NOMBRE_J]
 	mov qword rcx, [rdi + OFFSET_PAIS_J]
-	mov byte r8b, [rdi + OFFSET_NUMERO_J]
+	lea r8, [rdi + OFFSET_NUMERO_J]
 	mov dword r9d, [rdi + OFFSET_ALTURA_J]
 	mov rdi, rsi ;FILE
 	mov rsi, msg ;string
@@ -583,30 +640,36 @@ imprimir_jugador:
 	pop rbp
 	ret
 
+;seleccion *crear_seleccion(char *pais, double alturaPromedio, lista *jugadores)
 crear_seleccion:
 	push rbp
 	mov rbp, rsp
 	
-	push r15
-	push RDI
-	push rsi
-	push rdx
+	push r15;d
+	push r14;a
+	push r13;d
+	push r12;a
 	
-	
+	mov r14, rdi; pais
+	mov r13, rsi; alturaPromedio
+	mov r12, rdx; jugadores
 	
 	mov rdi, SELECCION_SIZE
 	call malloc
-	
-	pop qword [rax + OFFSET_JUGADORES_S] 
-	pop qword [rax + OFFSET_ALTURA_S]; ver cuanto mide un double
-	
-	pop rdi
 	mov r15, rax
+	
+	mov [r15 + OFFSET_JUGADORES_S], r12
+	mov [r15 + OFFSET_ALTURA_S], r13
+	
+	mov rdi, r14
 	call copiar_cadena
 	
 	mov [r15 + OFFSET_PAIS_S], rax
 	mov rax, r15
 	
+	pop r12
+	pop r13
+	pop r14
 	pop r15
 	pop rbp
 	ret
@@ -624,12 +687,13 @@ primer_jugador:
 	mov rbp, rsp
 
 	mov rdi, [rdi + OFFSET_JUGADORES_S]; me muevo a la lista
-	lea rdi, [rdi + OFFSET_PRIMERO]; me muevo al primer jugador
+	mov rdi, [rdi + OFFSET_PRIMERO]; me muevo al primer jugador
 	call copiar_jugador
 
 	pop rbp
 	ret
 
+;void borrar_seleccion(seleccion *s)
 borrar_seleccion:
 	push rbp
 	mov rbp, rsp
@@ -697,12 +761,13 @@ insertar_ordenado:
 	cmp rax, 0
 	jz  .agregoElNodo;no, entonces lo agrego
 	mov r12, [r12 + OFFSET_SIG]
+	; TENGO QUE VER QUE EL SIGUIENTE NO SEA CERO!!!!
 	jmp .buscarLugarParaInsertar
 .agregoElNodo:
 	mov [r11 + OFFSET_ANT], r12
 	
 	push qword [r12 + OFFSET_SIG]
-	pop [r11 + OFFSET_SIG]
+	pop qword [r11 + OFFSET_SIG]
 	
 	mov [r12 + OFFSET_SIG], r11
 	
@@ -711,7 +776,7 @@ insertar_ordenado:
 	
 	
 .finIncercion:
-	mov rax, 0
+	mov rax, r11
 	add rsp, 8
 	pop r11
 	pop R12
@@ -721,24 +786,149 @@ insertar_ordenado:
 	pop rbp
 	ret
 
+;double altura_promedio(lista *l)
 altura_promedio:
 	push rbp
 	mov rbp, rsp
-	; COMPLETAR AQUI EL CODIGO
+	
+	push r15;suma de alturas
+	push r14;nodo
+	push r13;contador
+	sub rsp, 8
+
+	xor r15, r15
+	xor r13,r13
+	mov r14, [rdi + OFFSET_PRIMERO]
+	cmp r14, 0
+	jz .listaVacia
+.loop:
+	mov rdi, [r14 +OFFSET_DATOS]
+	call obtenerAltura
+	add r15d, eax
+	inc r13
+	mov r14, [r14 + OFFSET_SIG]
+	cmp r14, 0
+	jz .finLoop
+	jmp .loop
+.finLoop:
+	movq xmm0, r15
+	movq xmm1, r13
+	DIVPD xmm0, xmm1
+	jmp .fin
+.listaVacia:
+	PXOR xmm0, xmm0
+.fin:
+	add rsp, 8
+	pop r13
+	pop r14
+	pop r15
 	pop rbp
 	ret
 
+;int obtenerAltura(jugador*)
+obtenerAltura:
+	push rbp
+	mov rbp, rsp
+	mov eax, [rdi + OFFSET_ALTURA_J]
+	pop rbp
+	ret
+
+
+;lista* ordenar_lista(lista*, tipo_funcion_cmp)
+ordenar_lista:
+	push rbp
+	mov rbp, rsp
+	push r15
+	push r14
+	push r13
+	sub rsp, 8
+
+	mov r15, [rdi + OFFSET_PRIMERO]
+	mov r14, rsi
+	
+	call lista_crear
+	mov r13, rax
+
+.loop:
+	cmp r15, 0
+	jz .finLoop
+	mov rdi, r13
+	mov rsi, [r15 + OFFSET_DATOS]
+	mov rdx, r14
+	call insertar_ordenado
+	mov r15, [r15 + OFFSET_SIG]
+	jmp .loop
+.finLoop:
+
+	add rsp, 8
+	pop r13
+	pop r14
+	pop r15
+	pop rbp
+	ret
+
+;lista *ordenar_lista_jugadores(lista *l)
 ordenar_lista_jugadores:
 	push rbp
 	mov rbp, rsp
-	; COMPLETAR AQUI EL CODIGO
+	
+	mov rsi, menor_jugador
+	call ordenar_lista
+
 	pop rbp
 	ret
 
+;lista *mapear(lista *l, tipo_funcion_mapear f)
 mapear:
 	push rbp
 	mov rbp, rsp
-	; COMPLETAR AQUI EL CODIGO
+	push r15; tipo_funcion_mapear f
+	push r14; nodo de la lista vieja
+	push r13; *lista_nueva
+	push r12; nodo nuevo anterior
+
+	mov r15, rsi
+	mov r14, [rdi + OFFSET_PRIMERO]
+
+	call lista_crear
+	mov r13, rax
+
+
+	;el primer nodo lo creo aparte para poder setear el primer elemento de la lista
+	cmp r14, 0
+	jz .fin
+	mov rdi, [r14 + OFFSET_DATOS]
+	call r15
+	mov rdi, rax
+	call nodo_crear
+	mov [r13 + OFFSET_PRIMERO], rax
+	mov r12, rax
+	; hasta ahora tengo un nodo nuevo, ahora empiezo a loopear
+
+
+	;r14 -> nodo que quiero mapear
+	;r12 -> nodo mapeado anterior
+.loop:
+	mov r14, [r14 + OFFSET_SIG]
+	cmp r14, 0
+	jz .finLoop
+	mov rdi, [r14 + OFFSET_DATOS]
+	call r15
+	mov rdi, rax
+	call nodo_crear
+	mov [r12 + OFFSET_SIG], rax
+	mov [rax + OFFSET_ANT], r12
+	mov r12, rax
+	jmp .loop
+
+.finLoop:
+	mov [r13 + OFFSET_ULTIMO], RAX
+
+.fin:
+	mov rax, r13
+	pop r12
+	pop r13
+	pop r14
+	pop r15
 	pop rbp
 	ret
-

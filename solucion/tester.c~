@@ -45,7 +45,7 @@ void caso1Elemento() {
   //assert(abs(altura_promedio(A)-6.0)<EPS);
 
   //imprimir_jugador(Gino, target);
-  borrar_jugador(Gino);
+  //borrar_jugador(Gino);
   //lista_imprimir_f(A, target, (tipo_funcion_imprimir)&imprimir_jugador);
   //lista* TodasLasSelecciones = generar_selecciones(A);
   //lista_borrar(TodasLasSelecciones, (tipo_funcion_borrar)&borrar_seleccion);
