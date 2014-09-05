@@ -657,8 +657,8 @@ crear_seleccion:
 	push r12;a
 	
 	mov r14, rdi; pais
-	mov r13, rsi; alturaPromedio
-	mov r12, rdx; jugadores
+	movq r13, xmm0; alturaPromedio
+	mov r12, rsi; jugadores
 	
 	mov rdi, SELECCION_SIZE
 	call malloc

@@ -15,17 +15,17 @@ int testSeleccion();
 
 int main(void) {
 
- //   testSizes();
- //   testNodo();
- //  testJugador();
- //   testJugador2();
- //   testJugador3();
- //  testJugador4();
- //   testLista();
+    testSizes();
+    testNodo();
+   testJugador();
+    testJugador2();
+    testJugador3();
+   testJugador4();
+    testLista();
 
- //   testCompararStrings();
+    testCompararStrings();
 
- //   testJugadores();
+   testJugadores();
 
     testSeleccion();
 
@@ -230,7 +230,6 @@ int testSeleccion()
     insertar_ordenado(A, (void*)GinoPies2, (tipo_funcion_cmp)&menor_jugador);
     insertar_ordenado(A, (void*)Gino2, (tipo_funcion_cmp)&menor_jugador);
     seleccion* w = crear_seleccion("Argentina", altura_promedio(A), A);
-    
     
 
     lista* B = lista_crear();

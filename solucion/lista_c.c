@@ -1,6 +1,6 @@
 #include "lista.h"
+#include <string.h>
 
-bool jugadores_del_mismo_pais(void * j1, void* j2);
 seleccion *crear_seleccion_map(void *dato);
 // Completar las funciones en C
 
@@ -19,7 +19,7 @@ lista *generar_selecciones( lista *l )
 		jugador *j1,*j2;
 		j1 = unNodo->datos;
 		j2 = nodoViejo->datos;
-		if(j1->pais == j2->pais)
+		if(/*pais_jugador(j1,j2)*/ strncmp(j1->pais,j2->pais, 100) == 0)
 		{
 			insertar_ultimo (jugadoresDelMismoPais,unNodo);
 		}else
@@ -51,17 +51,6 @@ seleccion *crear_seleccion_map(void *dato)
 	nodo *unNodo = jugadores->primero;
 	jugador *unJugador = unNodo->datos;
 	return crear_seleccion(unJugador->pais, altura_promedio(jugadores), jugadores);
-}
-
-
-bool jugadores_del_mismo_pais(void * j1, void* j2)
-{
-	jugador *jug1, *jug2;
-	jug1 = j1;
-	jug2 = j2;
-	if( *jug1->pais == *jug2->pais)
-		return true;
-	return false;
 }
 
 
