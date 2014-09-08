@@ -147,9 +147,9 @@ void casoNElementos() {
 }
 
 int main() {
-  srand(20140830);
+  srand(20140830); 
   remove("salida.caso1.txt");
-//  caso1Elemento();
+  caso1Elemento();
 
   remove("salida.caso2a.txt");
   remove("salida.caso2b.txt");

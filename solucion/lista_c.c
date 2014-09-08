@@ -2,55 +2,55 @@
 #include <string.h>
 
 seleccion *crear_seleccion_map(void *dato);
+void *nombrePorPais(void *j1);
+bool jugadores_de_paises_distintos(jugador *j1, jugador *j2);
+bool jugadores_del_mismo_pais(jugador *j1, jugador *j2);
 // Completar las funciones en C
 
 lista *generar_selecciones( lista *l )
 {
-	lista *listas_de_listas_de_jugadores = lista_crear();
 	lista *listas_de_jugadores = mapear(l, (tipo_funcion_mapear)&normalizar_jugador);
 	
-	nodo *unNodo= listas_de_jugadores->primero;
-	lista *jugadoresDelMismoPais = lista_crear();
-	insertar_ultimo (jugadoresDelMismoPais,unNodo);
-	nodo *nodoViejo = unNodo;
-	unNodo = unNodo->sig;
-	while(unNodo != NULL)
+	lista *listaDeSelecciones = lista_crear();
+	
+	while(listas_de_jugadores->primero != NULL)
 	{
-		jugador *j1,*j2;
-		j1 = unNodo->datos;
-		j2 = nodoViejo->datos;
-		if(/*pais_jugador(j1,j2)*/ strncmp(j1->pais,j2->pais, 100) == 0)
-		{
-			insertar_ultimo (jugadoresDelMismoPais,unNodo);
-		}else
-		{
-			insertar_ultimo (listas_de_listas_de_jugadores,nodo_crear ( (void *)jugadoresDelMismoPais));
-			jugadoresDelMismoPais = lista_crear();
-			insertar_ultimo (jugadoresDelMismoPais,unNodo);
-		}
+		lista *listaDeJugadoresDelMismoPais = filtrar_jugadores(listas_de_jugadores, (tipo_funcion_cmp)&jugadores_del_mismo_pais ,listas_de_jugadores->primero);
+		
+		lista *listaDeJugadoresDelMismoPaisOrdenados = ordenar_lista_jugadores(listaDeJugadoresDelMismoPais);
+		
+		lista_borrar(listaDeJugadoresDelMismoPais, (tipo_funcion_borrar)&borrar_jugador);
 
-		nodoViejo = unNodo;
-		unNodo = unNodo->sig;
+		jugador *j = listaDeJugadoresDelMismoPaisOrdenados->primero->datos;
+		
+		char *paisActual = j->pais;
+		
+		insertar_ordenado(listaDeSelecciones,crear_seleccion(paisActual, altura_promedio(listaDeJugadoresDelMismoPaisOrdenados), listaDeJugadoresDelMismoPaisOrdenados),(tipo_funcion_cmp)&menor_seleccion);
+		
+		lista *listas_de_jugadores_old = listas_de_jugadores;
+
+		listas_de_jugadores = filtrar_jugadores(listas_de_jugadores, (tipo_funcion_cmp)&jugadores_de_paises_distintos ,listas_de_jugadores->primero);
+	
+		lista_borrar(listas_de_jugadores_old, (tipo_funcion_borrar)&borrar_jugador);
 	}
 
-
-	lista *res = mapear(listas_de_listas_de_jugadores, (tipo_funcion_mapear)&crear_seleccion_map);
-	return ordenar_lista(res, (tipo_funcion_cmp)&menor_seleccion);
+	return listaDeSelecciones;
 }
 
-void*normalizar( void * dato)
+bool jugadores_del_mismo_pais(jugador *j1, jugador *j2)
 {
-	return normalizar_jugador(dato);
+	if(compararStrings(j1->pais,j2->pais) == 2)
+		return true;
+	return false;
 }
 
-
-seleccion *crear_seleccion_map(void *dato)
+bool jugadores_de_paises_distintos(jugador *j1, jugador *j2)
 {
-	lista *jugadores = dato;
-	//jugadores = mapear(jugadores, (tipo_funcion_mapear)&);
-	nodo *unNodo = jugadores->primero;
-	jugador *unJugador = unNodo->datos;
-	return crear_seleccion(unJugador->pais, altura_promedio(jugadores), jugadores);
+
+	if(compararStrings(j1->pais,j2->pais) != 2)
+		return true;
+	return false;
+
 }
 
 

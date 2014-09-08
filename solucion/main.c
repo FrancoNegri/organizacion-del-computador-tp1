@@ -12,23 +12,21 @@ int testCompararStrings();
 int compararStrings(char *s1, char *s2);
 int testJugadores();
 int testSeleccion();
+int testCMP();
 
 int main(void) {
 
-    testSizes();
-    testNodo();
-   testJugador();
-    testJugador2();
-    testJugador3();
-   testJugador4();
-    testLista();
-
-    testCompararStrings();
-
-   testJugadores();
-
-    testSeleccion();
-
+        //testSizes();
+        //testNodo();
+        //testJugador();
+        //testJugador2();
+        //testJugador3();
+        //testJugador4();
+        //testLista();
+        //testCompararStrings();
+        //testJugadores();
+        //testSeleccion();
+        testCMP();
     return 0;
 }
 
@@ -95,7 +93,7 @@ int testJugador3()
     char *nombre = "pepe";
     char *pais = "pepe";
     printf("Creando jugador...\n");
-    jugador *pepe = crear_jugador(nombre ,pais,'4',30);
+    jugador *pepe = crear_jugador(nombre ,pais, 4 ,30);
     printf("Ok!\n");
     FILE* target = fopen("mitest.txt","a");
     imprimir_jugador(pepe, target);
@@ -153,6 +151,11 @@ int testLista()
 
     printf("Insertando jugador 3\n");
     insertar_ordenado(miLista,(void*)pepe3, (tipo_funcion_cmp)&menor_jugador);
+
+    lista *backUp = miLista;
+    miLista = ordenar_lista_jugadores(backUp);
+
+    lista_borrar(backUp, (tipo_funcion_borrar)&borrar_jugador);    
 
     nodo *unNodo = miLista->primero;
     jugador *unj = unNodo->datos;
@@ -251,4 +254,18 @@ int testSeleccion()
     lista_borrar(listaDeSelecciones, (tipo_funcion_borrar)borrar_seleccion);
     printf("OK\n");
     return 0;
+}
+
+int testCMP()
+{
+    jugador* Gino = crear_jugador("Ginobili", "Argentina", 6, 7);
+    jugador* Gino2 = crear_jugador("Ginobili", "Argentina", 3, 7);
+    if(menor_jugador(Gino, Gino2))
+        printf("OK!\n");
+
+    borrar_jugador(Gino);
+    borrar_jugador(Gino2);
+
+    return 0;
+
 }

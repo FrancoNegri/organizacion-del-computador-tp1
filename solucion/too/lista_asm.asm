@@ -294,7 +294,7 @@ nodo_borrar:
     mov rdi, [rdi + OFFSET_DATOS]
     call rsi
     ;elimino el nodo
-    pop rdi
+	pop rdi
     sub rsp, 8
     call free
     add rsp, 8
@@ -308,7 +308,7 @@ nodo_borrar:
 ;void normalizar_altura(*int altura)
 normalizar_altura:
 	push rbp
-	mov rbp, rsp
+	mov rbp,rsp
 	push r15
 	sub rsp, 8
 
@@ -345,7 +345,7 @@ nodo_crear:
 	mov rdi, NODO_SIZE
 	call malloc
 	add rsp, 8
-	pop qword[rax + OFFSET_DATOS]
+	pop qword [rax + OFFSET_DATOS]
 	mov qword [rax + OFFSET_SIG], NULL
 	mov qword [rax + OFFSET_ANT], NULL
 	pop rbp
