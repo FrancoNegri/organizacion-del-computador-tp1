@@ -15,7 +15,7 @@ lista *generar_selecciones( lista *l )
 	
 	while(listas_de_jugadores->primero != NULL)
 	{
-		lista *listaDeJugadoresDelMismoPais = filtrar_jugadores(listas_de_jugadores, (tipo_funcion_cmp)&jugadores_del_mismo_pais ,listas_de_jugadores->primero);
+		lista *listaDeJugadoresDelMismoPais = filtrar_jugadores(listas_de_jugadores, (tipo_funcion_cmp)&pais_jugador ,listas_de_jugadores->primero);
 		
 		lista *listaDeJugadoresDelMismoPaisOrdenados = ordenar_lista_jugadores(listaDeJugadoresDelMismoPais);
 		
@@ -34,22 +34,19 @@ lista *generar_selecciones( lista *l )
 		lista_borrar(listas_de_jugadores_old, (tipo_funcion_borrar)&borrar_jugador);
 	}
 
+	lista_borrar(listas_de_jugadores, (tipo_funcion_borrar)&borrar_jugador);
+
+
 	return listaDeSelecciones;
 }
 
-bool jugadores_del_mismo_pais(jugador *j1, jugador *j2)
-{
-	if(compararStrings(j1->pais,j2->pais) == 2)
-		return true;
-	return false;
-}
 
 bool jugadores_de_paises_distintos(jugador *j1, jugador *j2)
 {
 
-	if(compararStrings(j1->pais,j2->pais) != 2)
-		return true;
-	return false;
+	if(pais_jugador(j1,j2))
+		return false;
+	return true;
 
 }
 

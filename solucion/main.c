@@ -1,5 +1,6 @@
 #include "lista.h"
 #include <stdio.h>
+#include <assert.h>
 
 int testSizes();
 int testJugador();
@@ -13,6 +14,13 @@ int compararStrings(char *s1, char *s2);
 int testJugadores();
 int testSeleccion();
 int testCMP();
+int pruebasOficiales();
+int p1();
+int p2();
+int p3();
+int    p4a();
+int    p4b();
+int    p5();
 
 int main(void) {
 
@@ -26,7 +34,9 @@ int main(void) {
         //testCompararStrings();
         //testJugadores();
         //testSeleccion();
-        testCMP();
+        //testCMP();
+        pruebasOficiales();
+
     return 0;
 }
 
@@ -178,14 +188,14 @@ int testLista()
     return 0;
 }
 
-int testCompararStrings()
+/*int testCompararStrings()
 {
     char *s1 = "b";
     char *s2 = "a";
     if(compararStrings(s1,s2) == 2)
         printf("exito! \n");
     return 0;
-}
+}*/
 
 
 int testSizes()
@@ -268,4 +278,144 @@ int testCMP()
 
     return 0;
 
+}
+
+void f (void* a) {
+    if(a != NULL)
+    {
+        ;
+    }
+
+}
+void g (void* a, FILE* b) {
+    if(a != b)
+    {
+        ;
+    }
+}
+
+int pruebasOficiales()
+{
+    p1();
+    p2();
+    p3();
+    p4a();
+    p4b();
+    p5();
+    
+    return 0;
+}
+
+int p1()
+{
+    lista *l = lista_crear();
+    lista_imprimir(l,"test.txt",(tipo_funcion_imprimir)&g);
+    lista_borrar(l,(tipo_funcion_borrar) &f);
+    return 0;
+}
+int p2()
+{
+    char *nombre = "pepe";
+    char *pais = "pepe";
+    jugador *pepe = crear_jugador(nombre ,pais, 4 ,30);
+    lista *l = lista_crear();
+    insertar_ordenado(l,pepe,(tipo_funcion_cmp)&menor_jugador);
+    lista_imprimir(l, "mitest.txt",(tipo_funcion_imprimir) &imprimir_jugador);
+    lista_borrar(l,(tipo_funcion_borrar) &borrar_jugador);
+    return 0;
+}
+
+bool h (void* a, void* b) {
+    if(a == b)
+    {
+        ;
+    }
+    return true;}
+int p3()
+{
+    char *nombre = "aaa";
+    char *pais = "pepe";
+    jugador *pepe = crear_jugador(nombre ,pais, 4 ,30);
+    lista *l = lista_crear();
+    char *nombre2 = "bbb";
+    char *pais2 = "pepe";
+    jugador *pepe2 = crear_jugador(nombre2 ,pais2, 4 ,30);
+    char *nombre3 = "aaa";
+    char *pais3 = "pepe";
+    jugador *pepe3 = crear_jugador(nombre3 ,pais3, 4 ,30);
+    insertar_ordenado(l,pepe,(tipo_funcion_cmp)&h);
+    insertar_ordenado(l,pepe2,(tipo_funcion_cmp)&h);
+    insertar_ordenado(l,pepe3,(tipo_funcion_cmp)&h);
+    assert(l->primero->sig->sig->datos == pepe);
+    lista_borrar(l,(tipo_funcion_borrar) &borrar_jugador);
+    return 0;
+}
+
+int p4a(){
+    lista *l= lista_crear();
+    lista *jugadores = lista_crear();
+    seleccion *sel = crear_seleccion("hola", 21.0, jugadores);
+    insertar_ordenado(l,sel,(tipo_funcion_cmp)&menor_seleccion);
+    lista_imprimir(l,"p4a.txt",(tipo_funcion_imprimir)&imprimir_seleccion);
+    lista_borrar(l,(tipo_funcion_borrar) &borrar_seleccion);
+    return 0;
+}
+int p4b(){
+    lista *jugadores = lista_crear();
+    lista *l = lista_crear();
+
+    char *nombre = "aaa";
+    char *pais = "pepe";
+    jugador *pepe = crear_jugador(nombre ,pais, 4 ,30);
+    
+    char *nombre2 = "bbb";
+    char *pais2 = "pepe";
+    jugador *pepe2 = crear_jugador(nombre2 ,pais2, 4 ,30);
+
+    insertar_ordenado(jugadores,pepe,(tipo_funcion_cmp)&h);
+    insertar_ordenado(jugadores,pepe2,(tipo_funcion_cmp)&h);
+
+    seleccion *sel = crear_seleccion("hola", 21.0, jugadores);
+    insertar_ordenado(l,sel,(tipo_funcion_cmp)&menor_seleccion);
+    lista_imprimir(l,"testSeleccion.txt",(tipo_funcion_imprimir)&imprimir_seleccion);
+    lista_borrar(l,(tipo_funcion_borrar) &borrar_seleccion);
+    return 0;
+}
+
+
+int p5(){
+
+    char *nombre = "aaa";
+    char *pais = "pepe";
+    jugador *pepe = crear_jugador(nombre ,pais, 4 ,30);
+
+    char *nombre2 = "aab";
+    char *pais2 = "pepe";
+    jugador *pepe2 = crear_jugador(nombre2 ,pais2, 4 ,30);
+
+ 
+    char *nombre3 = "bbb";
+    char *pais3 = "pepe2";
+    jugador *pepe3 = crear_jugador(nombre3 ,pais3, 4 ,30);
+
+    lista *l = lista_crear();
+
+    insertar_ordenado(l,pepe,(tipo_funcion_cmp)&menor_jugador);
+    insertar_ordenado(l,pepe2,(tipo_funcion_cmp)&menor_jugador);
+    insertar_ordenado(l,pepe3,(tipo_funcion_cmp)&menor_jugador);
+
+    lista *pop = mapear(l, (tipo_funcion_mapear)&normalizar_jugador);
+
+    lista_imprimir(pop,"ultimoTest.txt",(tipo_funcion_imprimir)&imprimir_jugador);
+
+    lista *l2 = filtrar_jugadores(l, (tipo_funcion_cmp)&pais_jugador,(void*) l->primero);
+
+    assert(menor_jugador(l->primero->datos,l2->primero->datos) && menor_jugador(l2->primero->datos,l->primero->datos));
+
+    lista_imprimir(l2,"swapsds",(tipo_funcion_imprimir)&imprimir_jugador);
+
+    lista_borrar(pop,(tipo_funcion_borrar) &borrar_jugador);
+    lista_borrar(l2,(tipo_funcion_borrar) &borrar_jugador);
+    lista_borrar(l,(tipo_funcion_borrar) &borrar_jugador);
+    return 0;
 }
